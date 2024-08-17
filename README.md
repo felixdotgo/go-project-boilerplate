@@ -4,7 +4,6 @@ This repo's name explain itself. Still have a lot of things todo
 ## TODOs
 - [ ] Add license file
 - [ ] Write document about how to use `.env` file
-- [ ] Makefile to run, build
 
 and more
 
