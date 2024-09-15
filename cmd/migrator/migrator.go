@@ -2,74 +2,99 @@ package main
 
 import (
 	"fmt"
+	"github.com/0x46656C6978/go-project-boilerplate/internal/config"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
-	"github.com/0x46656C6978/go-project-boilerplate/internal/dicontainer"
 	"github.com/0x46656C6978/go-project-boilerplate/internal/migrator"
 	"github.com/spf13/cobra"
-	"go.uber.org/dig"
 )
 
 func main() {
-	c := dig.New()
-	dicontainer.ProvideCore(c)
-	dicontainer.ProvideDB(c)
+	cfg, err := config.New()
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN: fmt.Sprintf(
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Etc/GMT",
+			cfg.DB.Host,
+			cfg.DB.User,
+			cfg.DB.Password,
+			cfg.DB.DBName,
+			cfg.DB.Port,
+		),
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	m, err := migrator.New(db)
+	if err != nil {
+		panic(err)
+	}
 
 	cmd := &cobra.Command{}
-	cmd.AddCommand(createCmd(c))
-	cmd.AddCommand(upCmd(c))
-	cmd.AddCommand(downCmd(c))
-	cmd.Execute()
+	cmd.AddCommand(createCmd(m))
+	cmd.AddCommand(upCmd(m))
+	cmd.AddCommand(downCmd(m))
+	err = cmd.Execute()
+	if err != nil {
+		return
+	}
 }
 
-func createCmd(c *dig.Container) *cobra.Command {
+func createCmd(m *migrator.Migrator) *cobra.Command {
 	migrationName := ""
 	migrationExtension := ""
-	createCmd := &cobra.Command{
-		Use:     "create",
-		Short:   "Create new migration file",
+	cmd := &cobra.Command{
+		Use:   "create",
+		Short: "Create new migration file",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := c.Invoke(func(m *migrator.Migrator) error {
-				return m.Create(migrationName, migrationExtension)
-			})
+			err := m.Create(migrationName, migrationExtension)
 			if err != nil {
-				fmt.Print(err.Error())
+				panic(err)
 			}
 		},
 	}
-	createCmd.Flags().StringVarP(&migrationName, "name", "n", "", "migration name")
-	createCmd.Flags().StringVarP(&migrationExtension, "ext", "e", "sql", "file extension")
-	createCmd.MarkFlagRequired("name")
-	return createCmd
+	cmd.Flags().StringVarP(&migrationName, "name", "n", "", "migration name")
+	cmd.Flags().StringVarP(&migrationExtension, "ext", "e", "sql", "file extension")
+	err := cmd.MarkFlagRequired("name")
+	if err != nil {
+		return nil
+	}
+	return cmd
 }
 
-func upCmd(c *dig.Container) *cobra.Command {
-	upCmd := &cobra.Command{
-		Use:     "up",
-		Short:   "Execute migrations",
+func upCmd(m *migrator.Migrator) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "up",
+		Short: "Execute migrations",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := c.Invoke(func(m *migrator.Migrator) error {
-				return m.Up()
-			})
+			err := m.Up()
 			if err != nil {
-				fmt.Print(err.Error())
+				panic(err)
 			}
 		},
 	}
-	return upCmd
+	return cmd
 }
 
-func downCmd(c *dig.Container) *cobra.Command {
-	downCmd := &cobra.Command{
-		Use:     "down",
-		Short:   "Revert all migrations",
+func downCmd(m *migrator.Migrator) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "down",
+		Short: "Revert all migrations",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := c.Invoke(func(m *migrator.Migrator) error {
-				return m.Down()
-			})
+			err := m.Down()
 			if err != nil {
-				fmt.Print(err.Error())
+				panic(err)
 			}
 		},
 	}
-	return downCmd
+	return cmd
 }
