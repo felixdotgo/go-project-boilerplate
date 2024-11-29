@@ -80,13 +80,16 @@ func New() (*Config, error) {
 
 // IsProduction check whether env mode is production or not
 func (c *Config) IsProduction() bool {
+	if c == nil {
+		return false
+	}
 	return c.EnvMode == ENV_PRODUCTION
 }
 
 // GetPort return string value of Port as int
 func (c *Config) GetPort() int {
-	if c != nil {
-		return conv.ToInt(c.Port)
+	if c == nil {
+		return 0
 	}
-	return 0
+	return conv.ToInt(c.Port)
 }
