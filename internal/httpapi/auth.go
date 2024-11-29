@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"errors"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"net/http"
 	"time"
 
@@ -106,7 +107,7 @@ func (u *AuthHttpApi) Register(c *gin.Context) {
 
 func (u *AuthHttpApi) OAuthLogin(c *gin.Context) {
 	store := sessions.NewCookieStore([]byte(u.cfg.JWT.Secret))
-	store.MaxAge(int(u.cfg.JWT.Expire))
+	store.MaxAge(conv.ToInt(u.cfg.JWT.Expire))
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true // HttpOnly should always be enabled
 	store.Options.Secure = false
@@ -155,8 +156,9 @@ func (u *AuthHttpApi) OAuthLoginCallback(c *gin.Context) {
 
 func (u *AuthHttpApi) generateJWTToken(user *entity.User) (string, error) {
 	now := time.Now()
+	exp := time.Duration(conv.ToInt64(u.cfg.JWT.Expire))
 	claims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(now.Add(u.cfg.JWT.Expire)),
+		ExpiresAt: jwt.NewNumericDate(now.Add(exp)),
 		IssuedAt:  jwt.NewNumericDate(now),
 		Issuer:    u.cfg.JWT.Issuer,
 		Subject:   user.Email,
