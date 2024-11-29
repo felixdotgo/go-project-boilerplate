@@ -94,8 +94,14 @@ func (u *AuthHttpApi) Register(c *gin.Context) {
 		return
 	}
 
+	user = &entity.User{}
 	user.Email = req.Email
-	user.SetPassword(req.Password)
+	err = user.SetPassword(req.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal error"})
+		return
+	}
+
 	err = u.s.Create(c.Request.Context(), user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal error"})
