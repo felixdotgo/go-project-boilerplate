@@ -1,11 +1,13 @@
 # Golang project boilerplate
 This repo's name explain itself. Still have a lot of things todo
 
-## TODOs
-- [ ] Add license file
-- [ ] Write document about how to use `.env` file
-
-and more
+# Get started
+Before we start please make sure you're already installed these pieces of software
+- Go >= 1.21.0
+- protoc >= 25.1
+- buf >= 1.47.2
+- Docker
+- Cmake/Make
 
 ## Migration commands
 Create migration in `migrations/sql` directory
