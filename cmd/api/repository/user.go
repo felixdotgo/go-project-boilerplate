@@ -2,10 +2,9 @@ package repository
 
 import (
 	"context"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
 
 	"gorm.io/gorm"
-
-	"github.com/0x46656C6978/go-project-boilerplate/internal/entity"
 )
 
 type UserRepoInterface interface {

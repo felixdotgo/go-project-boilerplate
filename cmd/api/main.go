@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/repository"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/service"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/httpapi"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/repository"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/service"
 	"gorm.io/driver/postgres"
 	gormlogger "gorm.io/gorm/logger"
 
-	"github.com/0x46656C6978/go-project-boilerplate/internal/config"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/httpapi"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )

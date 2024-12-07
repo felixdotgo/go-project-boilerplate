@@ -1,9 +1,9 @@
 package httpapi
 
 import (
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
 	"time"
 
-	"github.com/0x46656C6978/go-project-boilerplate/internal/config"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"github.com/fvbock/endless"
 	ginzap "github.com/gin-contrib/zap"

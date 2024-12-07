@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/config"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/migrator"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/0x46656C6978/go-project-boilerplate/internal/migrator"
 	"github.com/spf13/cobra"
 )
 

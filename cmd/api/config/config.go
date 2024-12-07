@@ -55,6 +55,7 @@ func New() (*Config, error) {
 	v.SetConfigName(".env")
 	v.SetConfigType("env")
 	v.AddConfigPath(".")
+	v.AddConfigPath("./cmd/api")
 	v.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
 
 	err := v.ReadInConfig()

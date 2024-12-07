@@ -30,6 +30,18 @@ vendor: ## Run go mod vendor
 	go mod vendor
 
 
+####
+# Run commands
+###
+.PHONY: run
+run: ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
+	@if [ -z "$(CMD)" ]; then \
+		echo "CMD is not set"; \
+	else \
+		go run "cmd/$(CMD)/main.go"; \
+	fi
+
+
 .PHONY: help
 help:  ## Display this help
 	@echo "Usage: make \033[36m<command>\033[0m"

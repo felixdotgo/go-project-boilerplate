@@ -2,13 +2,13 @@ package httpapi
 
 import (
 	"errors"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/service"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"net/http"
 	"time"
 
-	"github.com/0x46656C6978/go-project-boilerplate/internal/config"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/entity"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/sessions"

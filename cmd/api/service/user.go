@@ -3,9 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-
-	"github.com/0x46656C6978/go-project-boilerplate/internal/entity"
-	"github.com/0x46656C6978/go-project-boilerplate/internal/repository"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/repository"
 )
 
 type UserServiceInterface interface {
