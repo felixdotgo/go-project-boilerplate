@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/0x46656C6978/go-project-boilerplate/rpc";
+
+message Error {
+  string code = 1;
+  string message = 2;
+}

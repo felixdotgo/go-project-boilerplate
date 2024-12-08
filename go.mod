@@ -3,6 +3,7 @@ module github.com/0x46656C6978/go-project-boilerplate
 go 1.21.0
 
 require (
+	connectrpc.com/connect v1.17.0
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1
@@ -15,6 +16,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.25.0
 	golang.org/x/crypto v0.21.0
+	google.golang.org/protobuf v1.34.2
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5
 )
@@ -72,7 +74,6 @@ require (
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

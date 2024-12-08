@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+option go_package = "github.com/0x46656C6978/go-project-boilerplate/rpc";
+
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "common/error.proto";
+
+message Auth {
+  message AuthData {
+    string email = 1;
+    string password = 2;
+  }
+
+  message RegisterRequest {
+    Auth.AuthData data = 1;
+  }
+
+  message RegisterResponse {
+    common.Error error = 3;
+    google.protobuf.Any data = 4;
+  }
+
+  message LoginRequest {
+    Auth.AuthData data = 1;
+  }
+
+  message LoginResponse {
+    common.Error error = 3;
+    google.protobuf.Any data = 4;
+  }
+}
+
+service AuthService {
+  rpc Register(Auth.RegisterRequest) returns (Auth.RegisterResponse) {
+    option (google.api.http) = {
+      post: "v1/auth/register"
+      body: "data"
+    };
+  }
+
+  rpc Login(Auth.LoginRequest) returns (Auth.LoginResponse) {
+    option (google.api.http) = {
+      post: "v1/auth/login"
+      body: "data"
+    };
+  }
+}

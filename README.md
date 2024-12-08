@@ -18,3 +18,10 @@ Execute all migrations
 ```
 go run cmd/migrator/migrator.go up
 ```
+
+## Generate protobuf
+You can define your protobuf inside `proto` directory and then run the following command to generate output
+```bash
+buf generate --include-imports
+```
+All protobuf generated will be under `rpc` directory.
