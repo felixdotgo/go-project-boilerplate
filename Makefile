@@ -43,8 +43,16 @@ run: cmdcheck ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
 	@go run "cmd/$(CMD)/main.go"
 
 
+.PHONY: dockerfile_check
+dockerfile_check:
+	@if [ ! -f "cmd/$(CMD)/Dockerfile" ]; then \
+		echo "Dockerfile doesn't exist. Cannot build."; \
+		exit 1; \
+	fi
+
+
 .PHONY: build
-build: cmdcheck ## Build specific dir inside `cmd` with `make build CMD=<your dir>`
+build: cmdcheck dockerfile_check ## Build specific dir inside `cmd` with `make build CMD=<your dir>`
 	@docker build -t "$(CMD)" -f "cmd/$(CMD)/Dockerfile" .
 
 
