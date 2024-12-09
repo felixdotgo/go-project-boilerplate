@@ -30,16 +30,22 @@ vendor: ## Run go mod vendor
 	go mod vendor
 
 
-####
-# Run commands
-###
-.PHONY: run
-run: ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
+.PHONY: cmdcheck
+cmdcheck:
 	@if [ -z "$(CMD)" ]; then \
 		echo "CMD is not set"; \
-	else \
-		go run "cmd/$(CMD)/main.go"; \
+		exit 1; \
 	fi
+
+
+.PHONY: run
+run: cmdcheck ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
+	@go run "cmd/$(CMD)/main.go"
+
+
+.PHONY: build
+build: cmdcheck ## Build specific dir inside `cmd` with `make build CMD=<your dir>`
+	@docker build -t "$(CMD)" -f "cmd/$(CMD)/Dockerfile" .
 
 
 .PHONY: help
