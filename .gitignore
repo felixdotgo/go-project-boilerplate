@@ -28,3 +28,6 @@ go.work
 
 # Golang debug binaries
 __debug_bin*
+
+# IDE specific files
+.idea/
