@@ -1,13 +1,21 @@
 version: '3.1'
 
 services:
-  db:
+  db_postgres:
     image: postgres:16.1
     restart: always
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: root
+
+  db_mysql:
+    image: mysql:8.4
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
 
   adminer:
     image: adminer
