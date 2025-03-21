@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/httpapi"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/repository"
@@ -24,7 +25,7 @@ func main() {
 	}
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Etc/GMT",
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Etc/GMT",
 			cfg.DB.Host,
 			cfg.DB.User,
 			cfg.DB.Password,
@@ -35,6 +36,10 @@ func main() {
 	}), &gorm.Config{
 		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
 	})
+
+	if err != nil {
+		panic(err)
+	}
 
 	authRepo := repository.NewUserRepo(db)
 	authSvc := service.NewUserService(authRepo)

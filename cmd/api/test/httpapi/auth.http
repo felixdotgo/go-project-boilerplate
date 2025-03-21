@@ -1,4 +1,4 @@
-POST http://localhost:8000/auth/login
+POST http://localhost:8000/v1/auth/login
 
 {
   "email": "john.doe@gmail.com",

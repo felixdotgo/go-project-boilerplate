@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"errors"
+
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/repository"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 )
 
 type UserServiceInterface interface {
@@ -16,11 +18,15 @@ type UserServiceInterface interface {
 }
 
 type UserService struct {
+	*core.ServiceBase
 	r repository.UserRepoInterface
 }
 
-func NewUserService(r repository.UserRepoInterface) UserServiceInterface {
-	return &UserService{r: r}
+func NewUserService(userRepo repository.UserRepoInterface) UserServiceInterface {
+	return &UserService{
+		core.NewService("user"),
+		userRepo,
+	}
 }
 
 func (u *UserService) Create(ctx context.Context, user *entity.User) error {
