@@ -29,7 +29,26 @@ func NewLogger(isDebug bool) *Logger {
 // With returns a new logger instance with additional context.
 // The args parameter should be a series of key-value pairs, where each key is a string.
 func (l *Logger) With(args ...interface{}) *Logger {
-	// ...
+	ctx := l.logger.With()
+	totalArgs := len(args)
+
+	if totalArgs % 2 != 0 {
+		l.Panic("args must be even")
+		return nil
+	}
+
+	for i := 0; i < totalArgs; i += 2 {
+		k, ok := args[i].(string);
+		if !ok {
+			l.Panic("key must be string")
+			return nil
+		}
+		ctx = ctx.Interface(k, args[i+1])
+	}
+
+	nlog := ctx.Logger()
+	l.logger = &nlog
+	return l
 }
 
 // Debug logs a debug-level message.
