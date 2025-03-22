@@ -73,6 +73,13 @@ dockerfile_check:
 	fi
 
 
+.PHONY: generate-proto
+generate-proto: ## Generate protobuf code
+	@echo "$(BLUE)Generating protobuf code...$(RESET)"
+	@buf generate --include-imports
+	@echo "$(GREEN)✓ Protobuf code generated successfully$(RESET)"
+
+
 .PHONY: build
 build: cmdcheck dockerfile_check ## Build specific dir inside `cmd` with `make build CMD=<your dir> [PLATFORM=linux/amd64] [BUILD_ARGS="KEY1=value1,KEY2=value2"]`
 	@echo "$(BLUE)Building $(CMD) Docker image...$(RESET)"

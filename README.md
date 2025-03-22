@@ -24,4 +24,4 @@ You can define your protobuf inside `proto` directory and then run the following
 ```bash
 buf generate --include-imports
 ```
-All protobuf generated will be under `rpc` directory.
+All protobuf generated will be under `rpc` directory. To see how to implement API from generated code after run the command above, please refer to [Buf quick start](https://buf.build/docs/cli/quickstart/).
