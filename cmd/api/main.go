@@ -10,10 +10,10 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/repository"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/service"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
 	authv1 "github.com/0x46656C6978/go-project-boilerplate/rpc/api/auth/v1"
 	"github.com/fvbock/endless"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"gorm.io/driver/postgres"
@@ -23,17 +23,60 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-
+	// Load config
 	cfg, err := config.New()
 	if err != nil {
 		panic(err)
 	}
-	zlogger, err := zap.NewProduction()
+
+	logDebug := true
+	if cfg.GetEnvMode() == config.ENV_PRODUCTION {
+		logDebug = false
+	}
+
+	ctx := context.Background()
+	logger := log.NewLogger(logDebug)
+
+	db, err := getDBConnection(cfg)
 	if err != nil {
 		panic(err)
 	}
-	db, err := gorm.Open(postgres.New(postgres.Config{
+
+	authRepo := repository.NewUserRepo(db)
+	authSvc := service.NewUserService(authRepo)
+	authApi := httpapi.NewAuthServiceServer(cfg, authSvc)
+
+	mux := runtime.NewServeMux()
+	runtime.WithMiddlewares(logMiddleware(logger))(mux)
+
+	// APIs register
+	authv1.RegisterAuthServiceHandlerServer(ctx, mux, authApi)
+
+	engine := h2c.NewHandler(mux, &http2.Server{})
+	err = endless.ListenAndServe(":"+conv.ToString(cfg.Port), engine)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func logMiddleware(l *log.Logger) (func(h runtime.HandlerFunc) runtime.HandlerFunc) {
+	return func(h runtime.HandlerFunc) runtime.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request, params map[string]string) {
+			l.With(
+				"protocol", r.Proto,
+				"method", r.Method,
+				"host", r.Host,
+				"path", r.URL.Path,
+				"uri", r.RequestURI,
+				"remote_addr", r.RemoteAddr,
+			).Info("")
+			h(w, r, params)
+		}
+	}
+}
+
+func getDBConnection(cfg *config.Config) (*gorm.DB, error) {
+	return gorm.Open(postgres.New(postgres.Config{
 		DSN: fmt.Sprintf(
 			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Etc/GMT",
 			cfg.DB.Host,
@@ -46,29 +89,4 @@ func main() {
 	}), &gorm.Config{
 		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
 	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	authRepo := repository.NewUserRepo(db)
-	authSvc := service.NewUserService(authRepo)
-	authApi := httpapi.NewAuthServiceServer(cfg, authSvc)
-
-	logMiddleware := func(h runtime.HandlerFunc) runtime.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request, params map[string]string) {
-			zlogger.Info("request", zap.String("method", r.Method), zap.String("path", r.URL.Path))
-			h(w, r, params)
-		}
-	}
-
-	mux := runtime.NewServeMux()
-	runtime.WithMiddlewares(logMiddleware)(mux)
-	authv1.RegisterAuthServiceHandlerServer(ctx, mux, authApi)
-
-	engine := h2c.NewHandler(mux, &http2.Server{})
-	err = endless.ListenAndServe(":"+conv.ToString(cfg.Port), engine)
-	if err != nil {
-		panic(err)
-	}
 }

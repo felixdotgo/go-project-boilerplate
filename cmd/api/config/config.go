@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 const ENV_PRODUCTION = "production"
@@ -93,4 +94,12 @@ func (c *Config) GetPort() int {
 		return 0
 	}
 	return conv.ToInt(c.Port)
+}
+
+// GetEnvMode return string value of EnvMode
+func (c *Config) GetEnvMode() string {
+	if c == nil {
+		return ""
+	}
+	return c.EnvMode
 }

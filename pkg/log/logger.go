@@ -2,13 +2,17 @@
 package log
 
 import (
+	"context"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 // Logger represents a logger instance.
 type Logger struct {
+	isDebug bool
 	logger *zerolog.Logger
+	ctx    context.Context
 }
 
 // NewLogger returns a new logger instance.
@@ -23,7 +27,32 @@ func NewLogger(isDebug bool) *Logger {
 	}
 
 	l := log.With().Caller().Logger()
-	return &Logger{logger: &l}
+	return &Logger{
+		isDebug: isDebug,
+		logger: &l,
+		ctx: context.Background(),
+	}
+}
+
+func (l *Logger) GetIsDebug() bool {
+	if l == nil {
+		return false
+	}
+	return l.isDebug
+}
+
+func (l *Logger) GetCtx() context.Context {
+	return l.ctx
+}
+
+// WithCtx set the context for the logger
+func (l *Logger) WithCtx(ctx context.Context) *Logger {
+	if ctx == nil {
+		return l
+	}
+
+	l.ctx = ctx
+	return l
 }
 
 // With returns a new logger instance with additional context.
@@ -47,41 +76,45 @@ func (l *Logger) With(args ...interface{}) *Logger {
 	}
 
 	nlog := ctx.Logger()
-	l.logger = &nlog
-	return l
+
+	return &Logger{
+		isDebug: l.GetIsDebug(),
+		logger: &nlog,
+		ctx: l.GetCtx(),
+	}
 }
 
 // Debug logs a debug-level message.
 func (l *Logger) Debug(msg string, args ...interface{}) {
-	l.logger.Debug().Msgf(msg, args...)
+	l.logger.Debug().Ctx(l.ctx).Msgf(msg, args...)
 }
 
 // Info logs an info-level message.
 func (l *Logger) Info(msg string, args ...interface{}) {
-	l.logger.Info().Msgf(msg, args...)
+	l.logger.Info().Ctx(l.ctx).Msgf(msg, args...)
 }
 
 // Warn logs a warn-level message.
 func (l *Logger) Warn(msg string, args ...interface{}) {
-	l.logger.Warn().Msgf(msg, args...)
+	l.logger.Warn().Ctx(l.ctx).Msgf(msg, args...)
 }
 
 // Error logs an error-level message.
 func (l *Logger) Error(msg string, args ...interface{}) {
-	l.logger.Error().Msgf(msg, args...)
+	l.logger.Error().Ctx(l.ctx).Msgf(msg, args...)
 }
 
 // Fatal logs a fatal-level message and exits the program.
 func (l *Logger) Fatal(msg string, args ...interface{}) {
-	l.logger.Fatal().Msgf(msg, args...)
+	l.logger.Fatal().Ctx(l.ctx).Msgf(msg, args...)
 }
 
 // Panic logs a panic-level message and panics.
 func (l *Logger) Panic(msg string, args ...interface{}) {
-	l.logger.Panic().Msgf(msg, args...)
+	l.logger.Panic().Ctx(l.ctx).Msgf(msg, args...)
 }
 
 // Trace logs a trace-level message.
 func (l *Logger) Trace(msg string, args ...interface{}) {
-	l.logger.Trace().Msgf(msg, args...)
+	l.logger.Trace().Ctx(l.ctx).Msgf(msg, args...)
 }
