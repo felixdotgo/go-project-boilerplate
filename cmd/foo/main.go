@@ -1,29 +1,58 @@
 package main
 
 import (
-	ginzap "github.com/gin-contrib/zap"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-	"time"
+	"net/http"
+
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
+	"github.com/fvbock/endless"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
-	logger, err := zap.NewProduction()
+	// Load config
+	cfg, err := config.New()
 	if err != nil {
 		panic(err)
 	}
 
-	engine := gin.New()
-	engine.Use(ginzap.Ginzap(logger, time.RFC3339, true))
-	engine.Use(ginzap.RecoveryWithZap(logger, true))
-	engine.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+	logDebug := true
+	if cfg.GetEnvMode() == config.ENV_PRODUCTION {
+		logDebug = false
+	}
+
+	logger := log.NewLogger(logDebug)
+
+	mux := runtime.NewServeMux()
+	runtime.WithMiddlewares(logMiddleware(logger))(mux)
+
+	mux.HandlePath(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Hello, World!"))
 	})
 
-	err = engine.Run(":8000")
+	engine := h2c.NewHandler(mux, &http2.Server{})
+	err = endless.ListenAndServe(":"+conv.ToString(cfg.Port), engine)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func logMiddleware(l *log.Logger) (func(h runtime.HandlerFunc) runtime.HandlerFunc) {
+	return func(h runtime.HandlerFunc) runtime.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request, params map[string]string) {
+			l.With(
+				"protocol", r.Proto,
+				"method", r.Method,
+				"host", r.Host,
+				"path", r.URL.Path,
+				"uri", r.RequestURI,
+				"remote_addr", r.RemoteAddr,
+			).Info("")
+			h(w, r, params)
+		}
 	}
 }
