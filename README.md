@@ -1,7 +1,7 @@
 # Golang project boilerplate
 This repo's name explain itself. Still have a lot of things todo
 
-# Get started
+# Getting started
 Before we start please make sure you're already installed these pieces of software
 - Go >= 1.21.0
 - protoc >= 25.1
@@ -9,19 +9,12 @@ Before we start please make sure you're already installed these pieces of softwa
 - Docker
 - Cmake/Make
 
-## Migration commands
-Create migration in `migrations/sql` directory
-```
-go run cmd/migrator/migrator.go create -n my_file_name
-```
-Execute all migrations
-```
-go run cmd/migrator/migrator.go up
-```
+## Create a new service
+To create a new service, just simply make a copy of `cmd/foo` directory and rename it to whatever you want
 
 ## Generate protobuf
 You can define your protobuf inside `proto` directory and then run the following command to generate output
 ```bash
-buf generate --include-imports
+make generate-proto
 ```
 All protobuf generated will be under `rpc` directory. To see how to implement API from generated code after run the command above, please refer to [Buf quick start](https://buf.build/docs/cli/quickstart/).
