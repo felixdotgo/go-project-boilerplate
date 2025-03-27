@@ -12,12 +12,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// AuthHttpApi is a struct that implements the AuthServiceServer interface
+// contains all methods that will be used to handle authentication
 type AuthHttpApi struct {
 	v1.UnimplementedAuthServiceServer
 	s   service.UserServiceInterface
 	cfg *config.Config
 }
 
+// NewAuthServiceServer returns a new instance of AuthHttpApi struct that implements the AuthServiceServer interface
 func NewAuthServiceServer(cfg *config.Config, s service.UserServiceInterface) v1.AuthServiceServer {
 	return &AuthHttpApi{
 		s:   s,
@@ -25,6 +28,7 @@ func NewAuthServiceServer(cfg *config.Config, s service.UserServiceInterface) v1
 	}
 }
 
+// Login is a method that handles the login request
 func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1.Auth_LoginResponse, error) {
 	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
 	if err != nil {
@@ -46,6 +50,7 @@ func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1
 	}, nil
 }
 
+// Regiter is a method that handles the register request
 func (u *AuthHttpApi) Regiter(ctx context.Context, req *v1.Auth_RegisterRequest) (*v1.Auth_RegisterResponse, error) {
 	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
 	if err != nil {

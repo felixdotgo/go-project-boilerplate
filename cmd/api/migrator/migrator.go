@@ -13,12 +13,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// Migrator is a wrapper around golang-migrate
+// contains all methods that will be used to handle database migrations
 type Migrator struct {
 	m *migrate.Migrate
 }
 
 const MIGRATION_DIR = "file://migrations/sql"
 
+// New creates a new migrator
 func New(db *gorm.DB) (*Migrator, error) {
 	conn, err := db.DB()
 	if err != nil {
@@ -40,14 +43,17 @@ func New(db *gorm.DB) (*Migrator, error) {
 	}, nil
 }
 
+// Up runs all migrations
 func (m *Migrator) Up() error {
 	return m.m.Up()
 }
 
+// Down reverts all migrations
 func (m *Migrator) Down() error {
 	return m.m.Down()
 }
 
+// Create creates a new migration file
 func (m *Migrator) Create(name, ext string) error {
 	dir := strings.Replace(MIGRATION_DIR, "file://", "./", -1)
 	dir = filepath.Clean(dir)

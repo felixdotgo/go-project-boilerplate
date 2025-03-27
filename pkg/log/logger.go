@@ -34,6 +34,7 @@ func NewLogger(isDebug bool) *Logger {
 	}
 }
 
+// GetIsDebug returns true if the logger is configured to log at the debug level
 func (l *Logger) GetIsDebug() bool {
 	if l == nil {
 		return false
@@ -41,6 +42,7 @@ func (l *Logger) GetIsDebug() bool {
 	return l.isDebug
 }
 
+// GetCtx returns the context for the logger
 func (l *Logger) GetCtx() context.Context {
 	return l.ctx
 }

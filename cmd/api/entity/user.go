@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// User entity represents a real user in our application
 type User struct {
 	ID        int            `json:"id" gorm:"primarykey"`
 	Email     string         `json:"email"`
