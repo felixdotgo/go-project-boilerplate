@@ -57,7 +57,7 @@ func ToBool(in interface{}) bool {
 	}
 }
 
-// ToBools -
+// ToBools converts a slice of arbitrary inputs into a slice of boolean values
 func ToBools(in ...interface{}) []bool {
 	out := make([]bool, len(in))
 	for i, v := range in {
@@ -125,7 +125,7 @@ func Has(in interface{}, key interface{}) bool {
 	return false
 }
 
-// ToString -
+// ToString converts an arbitrary input into a string
 func ToString(in interface{}) string {
 	if in == nil {
 		return "nil"
@@ -147,7 +147,7 @@ func ToString(in interface{}) string {
 	return fmt.Sprint(in)
 }
 
-// ToStrings -
+// ToStrings converts a slice of arbitrary inputs into a slice of strings
 func ToStrings(in ...interface{}) []string {
 	out := make([]string, len(in))
 	for i, v := range in {
@@ -156,31 +156,31 @@ func ToStrings(in ...interface{}) []string {
 	return out
 }
 
-// MustParseInt - wrapper for strconv.ParseInt that returns 0 in the case of error
+// MustParseInt wrapper for strconv.ParseInt that returns 0 in the case of error
 func MustParseInt(s string, base, bitSize int) int64 {
 	i, _ := strconv.ParseInt(s, base, bitSize)
 	return i
 }
 
-// MustParseFloat - wrapper for strconv.ParseFloat that returns 0 in the case of error
+// MustParseFloat wrapper for strconv.ParseFloat that returns 0 in the case of error
 func MustParseFloat(s string, bitSize int) float64 {
 	i, _ := strconv.ParseFloat(s, bitSize)
 	return i
 }
 
-// MustParseUint - wrapper for strconv.ParseUint that returns 0 in the case of error
+// MustParseUint wrapper for strconv.ParseUint that returns 0 in the case of error
 func MustParseUint(s string, base, bitSize int) uint64 {
 	i, _ := strconv.ParseUint(s, base, bitSize)
 	return i
 }
 
-// MustAtoi - wrapper for strconv.Atoi that returns 0 in the case of error
+// MustAtoi wrapper for strconv.Atoi that returns 0 in the case of error
 func MustAtoi(s string) int {
 	i, _ := strconv.Atoi(s)
 	return i
 }
 
-// ToInt64 - convert input to an int64, if convertible. Otherwise, returns 0.
+// ToInt64 convert input to an int64, if convertible. Otherwise, returns 0.
 func ToInt64(v interface{}) int64 {
 	if str, ok := v.(string); ok {
 		return strToInt64(str)
@@ -209,7 +209,7 @@ func ToInt64(v interface{}) int64 {
 	}
 }
 
-// ToInt -
+// ToInt convert input to an int, if convertible. Otherwise, returns -1.
 func ToInt(in interface{}) int {
 	// Protect against CWE-190 and CWE-681
 	// https://cwe.mitre.org/data/definitions/190.html
@@ -222,7 +222,7 @@ func ToInt(in interface{}) int {
 	return -1
 }
 
-// ToInt64s -
+// ToInt64s converts a slice of arbitrary inputs into a slice of int64
 func ToInt64s(in ...interface{}) []int64 {
 	out := make([]int64, len(in))
 	for i, v := range in {
@@ -231,7 +231,7 @@ func ToInt64s(in ...interface{}) []int64 {
 	return out
 }
 
-// ToInts -
+// ToInts converts a slice of arbitrary inputs into a slice of int
 func ToInts(in ...interface{}) []int {
 	out := make([]int, len(in))
 	for i, v := range in {
@@ -240,7 +240,7 @@ func ToInts(in ...interface{}) []int {
 	return out
 }
 
-// ToFloat64 - convert input to a float64, if convertible. Otherwise, returns 0.
+// ToFloat64 convert input to a float64, if convertible. Otherwise, returns 0.
 func ToFloat64(v interface{}) float64 {
 	if str, ok := v.(string); ok {
 		return strToFloat64(str)
@@ -302,7 +302,7 @@ func strToFloat64(str string) float64 {
 	return float64(iv)
 }
 
-// ToFloat64s -
+// ToFloat64s converts a slice of arbitrary inputs into a slice of float64
 func ToFloat64s(in ...interface{}) []float64 {
 	out := make([]float64, len(in))
 	for i, v := range in {
