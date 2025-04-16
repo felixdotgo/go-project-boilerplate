@@ -6,9 +6,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY ./pkg/ ./pkg
 COPY ./rpc/ ./rpc
-COPY cmd/foo ./cmd/foo
+COPY cmd/api ./cmd/api
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /server ./cmd/foo/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /server ./cmd/api/main.go
 
 
 FROM alpine:3.21 AS run
