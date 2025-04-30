@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/service"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/config"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/service"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	v1 "github.com/0x46656C6978/go-project-boilerplate/rpc/api/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
@@ -26,6 +26,13 @@ func NewAuthServiceServer(cfg *config.Config, s service.UserServiceInterface) v1
 		s:   s,
 		cfg: cfg,
 	}
+}
+
+// Ping is a method that handles the ping request
+func (u *AuthHttpApi) Ping(ctx context.Context, req *v1.Auth_PingRequest) (*v1.Auth_PingResponse, error) {
+	return &v1.Auth_PingResponse{
+		Message: "pong",
+	}, nil
 }
 
 // Login is a method that handles the login request

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/repository"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/repository"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 )
 

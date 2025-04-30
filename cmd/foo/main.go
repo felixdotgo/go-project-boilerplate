@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/config"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/foo/config"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"

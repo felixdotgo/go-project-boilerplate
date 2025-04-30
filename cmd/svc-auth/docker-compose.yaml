@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      args:
+        PLATFORM: ${PLATFORM}
+        IMAGE_NAME_TAG: ${IMAGE_NAME_TAG}
+      context: ../../
+      dockerfile: cmd/svc-auth/Dockerfile
+    ports:
+      - "8000:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.svc-auth.rule=Host(`api.local`) && PathPrefix(`/v1/auth`)"
+      - "traefik.http.services.svc-auth.loadbalancer.server.port=8000"
+    networks:
+      - gpnetwork
+
+networks:
+  gpnetwork:
+    external: true
+    name: gpnetwork

@@ -30,6 +30,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /v1/auth/ping:
+        get:
+            tags:
+                - AuthService
+            operationId: AuthService_Ping
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_PingResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /v1/auth/register:
         post:
             tags:
@@ -74,6 +92,11 @@ components:
             type: object
             properties:
                 token:
+                    type: string
+        Auth_PingResponse:
+            type: object
+            properties:
+                message:
                     type: string
         Auth_RegisterResponse:
             type: object

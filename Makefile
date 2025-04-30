@@ -92,6 +92,16 @@ build: cmdcheck dockerfile_check ## Build specific dir inside `cmd` with `make b
 	@echo "🎉 $(GREEN)Successfully built $(CMD) image$(RESET)"
 
 
+.PHONY: up
+up: build ## up: Build and start the service
+	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
+	@cd cmd/$(CMD)/ && docker-compose up
+
+.PHONY: upd
+upd: build ## up: Build and start the service (detached mode)
+	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
+	@cd cmd/$(CMD)/ && docker-compose up -d
+
 .PHONY: help
 help:  ## Display this help
 	@echo "$(GREEN)╔══════════════════════════════════════════════════════════════╗$(RESET)"

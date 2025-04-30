@@ -1,8 +1,8 @@
-# api service
+# Authentication service
 ## Run service
 Under root directory, run the following command
 ```
-make run CMD=api
+make run CMD=svc-auth
 ```
 
 ## Migration commands

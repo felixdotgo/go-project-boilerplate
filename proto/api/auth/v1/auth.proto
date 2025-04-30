@@ -9,6 +9,12 @@ import "google/protobuf/any.proto";
 import "common/error.proto";
 
 message Auth {
+  message PingRequest {}
+
+  message PingResponse {
+    string message = 1;
+  }
+
   message AuthData {
     string email = 1;
     string password = 2;
@@ -38,6 +44,12 @@ message Auth {
 }
 
 service AuthService {
+  rpc Ping(Auth.PingRequest) returns (Auth.PingResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/ping"
+    };
+  }
+
   rpc Register(Auth.RegisterRequest) returns (Auth.RegisterResponse) {
     option (google.api.http) = {
       post: "/v1/auth/register"

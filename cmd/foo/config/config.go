@@ -53,12 +53,13 @@ func New() (*Config, error) {
 	// solution: https://stackoverflow.com/a/63541140/9839165
 	v := viper.New()
 	v.AutomaticEnv()
+	v.AllowEmptyEnv(true)
+	// Load config from .env file
 	v.SetConfigName(".env")
 	v.SetConfigType("env")
+	v.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
 	v.AddConfigPath(".")
 	v.AddConfigPath("./cmd/api")
-	v.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
-
 	err := v.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("error reading config file: %s", err)
@@ -67,13 +68,11 @@ func New() (*Config, error) {
 	var result map[string]interface{}
 	var cfg *Config
 
-	err = v.Unmarshal(&result)
-	if err != nil {
+	if err := v.Unmarshal(&result); err != nil {
 		return nil, fmt.Errorf("error unmarshalling config: %s", err)
 	}
 
-	err = mapstructure.Decode(result, &cfg)
-	if err != nil {
+	if err := mapstructure.Decode(result, &cfg); err != nil {
 		return nil, fmt.Errorf("error decoding config: %s", err)
 	}
 

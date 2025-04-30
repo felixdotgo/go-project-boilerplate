@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/api/entity"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
 
 	"gorm.io/gorm"
 )
