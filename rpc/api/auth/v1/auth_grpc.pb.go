@@ -28,8 +28,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
+	// For health check requests
 	Ping(ctx context.Context, in *Auth_PingRequest, opts ...grpc.CallOption) (*Auth_PingResponse, error)
+	// Handle register new account requests
 	Register(ctx context.Context, in *Auth_RegisterRequest, opts ...grpc.CallOption) (*Auth_RegisterResponse, error)
+	// Handle login requests
 	Login(ctx context.Context, in *Auth_LoginRequest, opts ...grpc.CallOption) (*Auth_LoginResponse, error)
 }
 
@@ -75,8 +78,11 @@ func (c *authServiceClient) Login(ctx context.Context, in *Auth_LoginRequest, op
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 type AuthServiceServer interface {
+	// For health check requests
 	Ping(context.Context, *Auth_PingRequest) (*Auth_PingResponse, error)
+	// Handle register new account requests
 	Register(context.Context, *Auth_RegisterRequest) (*Auth_RegisterResponse, error)
+	// Handle login requests
 	Login(context.Context, *Auth_LoginRequest) (*Auth_LoginResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }

@@ -10,13 +10,17 @@ paths:
         post:
             tags:
                 - AuthService
+            description: Handle login requests
             operationId: AuthService_Login
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Auth_AuthData'
-                required: true
+            parameters:
+                - name: email
+                  in: query
+                  schema:
+                    type: string
+                - name: password
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -34,6 +38,7 @@ paths:
         get:
             tags:
                 - AuthService
+            description: For health check requests
             operationId: AuthService_Ping
             responses:
                 "200":
@@ -52,13 +57,21 @@ paths:
         post:
             tags:
                 - AuthService
+            description: Handle register new account requests
             operationId: AuthService_Register
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/Auth_AuthData'
-                required: true
+            parameters:
+                - name: email
+                  in: query
+                  schema:
+                    type: string
+                - name: password
+                  in: query
+                  schema:
+                    type: string
+                - name: passwordConfirm
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -77,20 +90,22 @@ components:
         Auth_AuthData:
             type: object
             properties:
-                email:
-                    type: string
-                password:
+                user:
+                    $ref: '#/components/schemas/User'
+                token:
                     type: string
         Auth_LoginResponse:
             type: object
             properties:
-                error:
-                    $ref: '#/components/schemas/Error'
                 data:
                     $ref: '#/components/schemas/Auth_LoginResponseData'
+                error:
+                    $ref: '#/components/schemas/Error'
         Auth_LoginResponseData:
             type: object
             properties:
+                user:
+                    $ref: '#/components/schemas/User'
                 token:
                     type: string
         Auth_PingResponse:
@@ -101,10 +116,10 @@ components:
         Auth_RegisterResponse:
             type: object
             properties:
+                data:
+                    $ref: '#/components/schemas/Auth_AuthData'
                 error:
                     $ref: '#/components/schemas/Error'
-                data:
-                    $ref: '#/components/schemas/GoogleProtobufAny'
         Error:
             type: object
             properties:
@@ -136,5 +151,18 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        User:
+            type: object
+            properties:
+                id:
+                    type: string
+                email:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
 tags:
     - name: AuthService

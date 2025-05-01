@@ -7,6 +7,7 @@ option go_package = "github.com/0x46656C6978/go-project-boilerplate/rpc";
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
 import "common/error.proto";
+import "models/user.proto";
 
 message Auth {
   message PingRequest {}
@@ -16,51 +17,56 @@ message Auth {
   }
 
   message AuthData {
+    models.User user = 1;
+    string token = 2;
+  }
+
+  message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string passwordConfirm = 3;
+  }
+
+  message RegisterResponse {
+    Auth.AuthData data = 1;
+    common.Error error = 2;
+  }
+
+  message LoginRequest {
     string email = 1;
     string password = 2;
   }
 
-  message RegisterRequest {
-    Auth.AuthData data = 1;
-  }
-
-  message RegisterResponse {
-    common.Error error = 3;
-    google.protobuf.Any data = 4;
-  }
-
-  message LoginRequest {
-    Auth.AuthData data = 1;
-  }
-
   message LoginResponseData {
-    string token = 1;
+    models.User user = 1;
+    string token = 2;
   }
 
   message LoginResponse {
-    common.Error error = 3;
-    LoginResponseData data = 4;
+    LoginResponseData data = 1;
+    common.Error error = 2;
   }
 }
 
 service AuthService {
+  // For health check requests
   rpc Ping(Auth.PingRequest) returns (Auth.PingResponse) {
     option (google.api.http) = {
       get: "/v1/auth/ping"
     };
   }
 
+  // Handle register new account requests
   rpc Register(Auth.RegisterRequest) returns (Auth.RegisterResponse) {
     option (google.api.http) = {
       post: "/v1/auth/register"
-      body: "data"
     };
   }
 
+  // Handle login requests
   rpc Login(Auth.LoginRequest) returns (Auth.LoginResponse) {
     option (google.api.http) = {
       post: "/v1/auth/login"
-      body: "data"
     };
   }
 }

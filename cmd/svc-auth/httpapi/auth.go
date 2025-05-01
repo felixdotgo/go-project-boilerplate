@@ -37,11 +37,11 @@ func (u *AuthHttpApi) Ping(ctx context.Context, req *v1.Auth_PingRequest) (*v1.A
 
 // Login is a method that handles the login request
 func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1.Auth_LoginResponse, error) {
-	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
+	user, err := u.s.FindByEmail(ctx, req.GetEmail())
 	if err != nil {
 		return nil, err
 	}
-	err = u.s.VerifyCredentials(ctx, user, req.Data.GetEmail(), req.GetData().GetPassword())
+	err = u.s.VerifyCredentials(ctx, user, req.GetEmail(), req.GetPassword())
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1
 
 // Regiter is a method that handles the register request
 func (u *AuthHttpApi) Regiter(ctx context.Context, req *v1.Auth_RegisterRequest) (*v1.Auth_RegisterResponse, error) {
-	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
+	user, err := u.s.FindByEmail(ctx, req.GetEmail())
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +68,8 @@ func (u *AuthHttpApi) Regiter(ctx context.Context, req *v1.Auth_RegisterRequest)
 	}
 
 	user = &entity.User{}
-	user.Email = req.GetData().GetEmail()
-	err = user.SetPassword(req.GetData().GetPassword())
+	user.Email = req.GetEmail()
+	err = user.SetPassword(req.GetPassword())
 	if err != nil {
 		return nil, err
 	}
