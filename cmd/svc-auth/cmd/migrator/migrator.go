@@ -50,7 +50,7 @@ func main() {
 	}
 }
 
-func createCmd(m *migrator.Migrator) *cobra.Command {
+func createCmd(m migrator.MigratorInterface) *cobra.Command {
 	migrationName := ""
 	migrationExtension := ""
 	cmd := &cobra.Command{
@@ -72,7 +72,7 @@ func createCmd(m *migrator.Migrator) *cobra.Command {
 	return cmd
 }
 
-func upCmd(m *migrator.Migrator) *cobra.Command {
+func upCmd(m migrator.MigratorInterface) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "up",
 		Short: "Execute migrations",
@@ -86,7 +86,7 @@ func upCmd(m *migrator.Migrator) *cobra.Command {
 	return cmd
 }
 
-func downCmd(m *migrator.Migrator) *cobra.Command {
+func downCmd(m migrator.MigratorInterface) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "down",
 		Short: "Revert all migrations",
