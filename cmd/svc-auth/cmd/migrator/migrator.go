@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/config"
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/migrator"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/migrator"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
