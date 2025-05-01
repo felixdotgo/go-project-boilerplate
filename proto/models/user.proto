@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package models;
+
+option go_package = "github.com/0x46656C6978/go-project-boilerplate/rpc";
+
+import "google/protobuf/timestamp.proto";
+
+message User {
+  string id = 1;
+  string email = 2;
+
+  google.protobuf.Timestamp createdAt = 100;
+  google.protobuf.Timestamp updatedAt = 101;
+}
