@@ -12,15 +12,12 @@ paths:
                 - AuthService
             description: Handle login requests
             operationId: AuthService_Login
-            parameters:
-                - name: email
-                  in: query
-                  schema:
-                    type: string
-                - name: password
-                  in: query
-                  schema:
-                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Auth_LoginRequestData'
+                required: true
             responses:
                 "200":
                     description: OK
@@ -59,19 +56,12 @@ paths:
                 - AuthService
             description: Handle register new account requests
             operationId: AuthService_Register
-            parameters:
-                - name: email
-                  in: query
-                  schema:
-                    type: string
-                - name: password
-                  in: query
-                  schema:
-                    type: string
-                - name: passwordConfirm
-                  in: query
-                  schema:
-                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Auth_RegisterRequestData'
+                required: true
             responses:
                 "200":
                     description: OK
@@ -94,6 +84,13 @@ components:
                     $ref: '#/components/schemas/User'
                 token:
                     type: string
+        Auth_LoginRequestData:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
         Auth_LoginResponse:
             type: object
             properties:
@@ -112,6 +109,15 @@ components:
             type: object
             properties:
                 message:
+                    type: string
+        Auth_RegisterRequestData:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+                passwordConfirm:
                     type: string
         Auth_RegisterResponse:
             type: object

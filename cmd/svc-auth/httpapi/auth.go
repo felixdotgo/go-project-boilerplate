@@ -2,6 +2,8 @@ package httpapi
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"time"
 
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/config"
@@ -10,6 +12,10 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	v1 "github.com/0x46656C6978/go-project-boilerplate/rpc/api/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	ErrInternalServerError = "internal server error"
 )
 
 // AuthHttpApi is a struct that implements the AuthServiceServer interface
@@ -37,18 +43,21 @@ func (u *AuthHttpApi) Ping(ctx context.Context, req *v1.Auth_PingRequest) (*v1.A
 
 // Login is a method that handles the login request
 func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1.Auth_LoginResponse, error) {
-	user, err := u.s.FindByEmail(ctx, req.GetEmail())
+	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
 	if err != nil {
-		return nil, err
+		if errors.Is(err, service.ErrUserNotFound) {
+			return nil, NewError(http.StatusNotFound, "user not found")
+		}
+		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
-	err = u.s.VerifyCredentials(ctx, user, req.GetEmail(), req.GetPassword())
+	err = u.s.VerifyCredentials(ctx, user, req.GetData().GetEmail(), req.GetData().GetPassword())
 	if err != nil {
-		return nil, err
+		return nil, NewError(http.StatusBadRequest, "invalid credentials")
 	}
 
 	signedStr, err := u.generateJWTToken(user)
 	if err != nil {
-		return nil, err
+		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
     return &v1.Auth_LoginResponse{
 		Data: &v1.Auth_LoginResponseData{
@@ -59,24 +68,24 @@ func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1
 
 // Regiter is a method that handles the register request
 func (u *AuthHttpApi) Regiter(ctx context.Context, req *v1.Auth_RegisterRequest) (*v1.Auth_RegisterResponse, error) {
-	user, err := u.s.FindByEmail(ctx, req.GetEmail())
+	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
 	if err != nil {
-		return nil, err
+		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
 	if user != nil {
-		return nil, err
+		return nil, NewError(http.StatusConflict, "user already exists")
 	}
 
 	user = &entity.User{}
-	user.Email = req.GetEmail()
-	err = user.SetPassword(req.GetPassword())
+	user.Email = req.GetData().GetEmail()
+	err = user.SetPassword(req.GetData().GetPassword())
 	if err != nil {
-		return nil, err
+		return nil, NewError(http.StatusBadRequest, "unable to set password")
 	}
 
 	err = u.s.Create(ctx, user)
 	if err != nil {
-		return nil, err
+		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
 
     return &v1.Auth_RegisterResponse{

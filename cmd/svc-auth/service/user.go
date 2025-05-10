@@ -9,6 +9,10 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 )
 
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
+
 // UserServiceInterface is an interface define all methods that will be used to handle user
 type UserServiceInterface interface {
 	Create(ctx context.Context, user *entity.User) error
@@ -39,7 +43,11 @@ func (u *UserService) Create(ctx context.Context, user *entity.User) error {
 
 // FindByEmail returns a user by given email, return error if any
 func (u *UserService) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
-	return u.r.FindByEmail(ctx, email)
+	req, err := u.r.FindByEmail(ctx, email)
+	if err != nil {
+		return nil, u.repoToServiceError(err)
+	}
+	return req, nil
 }
 
 // FindByID returns a user by given id, return error if any
@@ -63,4 +71,12 @@ func (u *UserService) VerifyCredentials(ctx context.Context, user *entity.User, 
 		return errors.New("invalid password")
 	}
 	return nil
+}
+
+// repoToServiceError convert repository error to service error
+func (u *UserService) repoToServiceError(err error) error {
+	if errors.Is(err, repository.ErrNotFound) {
+		return ErrUserNotFound
+	}
+	return err
 }

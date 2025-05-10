@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
 	"gorm.io/gorm"
@@ -24,6 +25,9 @@ func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*entity.User,
 	var user *entity.User
 	err := r.db.First(&user, "email = ?", email).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 	return user, nil
@@ -34,6 +38,9 @@ func (r *UserRepo) FindByID(ctx context.Context, id int) (*entity.User, error) {
 	var user *entity.User
 	err := r.db.First(&user, "id = ?", id).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 	return user, nil
