@@ -7,14 +7,14 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
 )
 
-// ServiceBase is a struct that contains the logger
-// and other common methods that will be used by all services
-type ServiceBase struct {
+// RepositoryBase is a struct that contains the logger
+// and other common methods that will be used by all repositories
+type RepositoryBase struct {
 	Logger *log.Logger
 }
 
-// NewService returns a new ServiceBase
-func NewService(name string) *ServiceBase {
+// NewRepository returns a new RepositoryBase
+func NewRepository(name string) *RepositoryBase {
     debug := flag.Bool("debug", false, "sets log level to debug")
     flag.Parse()
 
@@ -25,12 +25,12 @@ func NewService(name string) *ServiceBase {
 		l.Panic("failed to compile regex")
 	}
 	if re.MatchString(name) {
-		l.Panic("service name must be A-Z, a-z, .")
+		l.Panic("repository name must be A-Z, a-z, .")
 	}
 
-	l = l.With("serviceName", name)
+	l = l.With("repositoryName", name)
 
-	return &ServiceBase{
+	return &RepositoryBase{
 		Logger: l,
 	}
 }

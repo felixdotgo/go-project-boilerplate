@@ -5,18 +5,21 @@ import (
 	"errors"
 
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
+	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 	"gorm.io/gorm"
 )
 
 // UserRepo is a struct that implements UserRepoInterface
 type UserRepo struct {
+	*core.RepositoryBase
 	db *gorm.DB
 }
 
 // NewUserRepo creates a new UserRepo
 func NewUserRepo(db *gorm.DB) UserRepoInterface {
 	return &UserRepo{
-		db: db,
+		core.NewRepository("user"),
+		db,
 	}
 }
 
