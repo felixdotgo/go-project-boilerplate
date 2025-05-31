@@ -59,7 +59,7 @@ func New() (*Config, error) {
 	v.SetConfigType("env")
 	v.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
 	v.AddConfigPath(".")
-	v.AddConfigPath("./cmd/api")
+	v.AddConfigPath("./cmd/svc-auth")
 	err := v.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("error reading config file: %s", err)
