@@ -32,6 +32,8 @@ services:
       - "traefik.http.routers.postgres.rule=Host(`postgres.local`)"
     networks:
       - gpnetwork
+    volumes:
+      - ./.docker/postgres:/var/lib/postgresql/data
 
   # mysql:
   #   image: mysql:8.4

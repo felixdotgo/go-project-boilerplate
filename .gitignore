@@ -31,3 +31,6 @@ __debug_bin*
 
 # IDE specific files
 .idea/
+
+# Local data for Docker
+.docker/
