@@ -15,16 +15,19 @@ type ServiceBase struct {
 
 // NewService returns a new ServiceBase
 func NewService(name string) *ServiceBase {
-    debug := flag.Bool("debug", false, "sets log level to debug")
-    flag.Parse()
+	debug := false
+	if flag.Lookup("debug") == nil {
+		debug = *flag.Bool("debug", false, "sets log level to debug")
+	}
+	flag.Parse()
 
-	l := log.NewLogger(*debug)
+	l := log.NewLogger(debug)
 
 	re, err := regexp.Compile(`^[a-zA-Z.]+$`)
 	if err != nil {
 		l.Panic("failed to compile regex")
 	}
-	if re.MatchString(name) {
+	if !re.MatchString(name) {
 		l.Panic("service name must be A-Z, a-z, .")
 	}
 

@@ -24,7 +24,7 @@ func NewRepository(name string) *RepositoryBase {
 	if err != nil {
 		l.Panic("failed to compile regex")
 	}
-	if re.MatchString(name) {
+	if !re.MatchString(name) {
 		l.Panic("repository name must be A-Z, a-z, .")
 	}
 
