@@ -12,11 +12,11 @@ export default function Login() {
       </MetaProvider>
       <div class="flex w-full mx-auto">
         <div class="hidden lg:block w-1/2 h-screen bg-primary"></div>
-        <div class="relative w-full lg:w-1/2 justify-items-center content-center">
-          <div class="fixed top-4 right-4">
+        <div class="relative w-full h-screen min-h-96 lg:w-1/2 justify-items-center content-center">
+          <div class="fixed bottom-4 left-4 lg:top-4 lg:right-4">
             <ModeToggle />
           </div>
-          <div class="w-full max-w-sm">
+          <div class="w-full max-w-sm p-4">
             <TextField class="mb-4">
               <TextFieldLabel>Email</TextFieldLabel>
               <TextFieldInput type="text" />
