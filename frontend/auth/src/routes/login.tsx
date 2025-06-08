@@ -1,7 +1,7 @@
 import { MetaProvider, Title } from "@solidjs/meta";
+import { BsApple, BsFacebook, BsGoogle } from "solid-icons/bs";
 import { ModeToggle } from "~/components/mode-toggle";
 import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 
 export default function Login() {
@@ -38,7 +38,11 @@ export default function Login() {
               </div>
             </div>
 
-            <Button class="w-full" variant={"secondary"}>Google</Button>
+            <div class="flex flex-auto justify-between">
+              <Button class="w-1/3 mr-1" variant={"outline"}><BsGoogle /> Google</Button>
+              <Button class="w-1/3 mr-1" variant={"outline"}><BsFacebook /> Facebook</Button>
+              <Button class="w-1/3" variant={"outline"}><BsApple /> Apple</Button>
+            </div>
           </div>
         </div>
       </div>
