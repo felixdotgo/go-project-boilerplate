@@ -1,5 +1,3 @@
-const { fontFamily } = require("tailwindcss/defaultTheme")
-
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["variant", [".dark &", '[data-kb-theme="dark"] &']],
@@ -14,9 +12,6 @@ export default {
       }
     },
     extend: {
-      fontFamily: {
-        sans: ["Inter", ...fontFamily.sans]
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
