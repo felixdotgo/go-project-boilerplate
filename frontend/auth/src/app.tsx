@@ -3,6 +3,8 @@ import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
 import "./app.css";
 
+import { MetaProvider, Title } from "@solidjs/meta";
+
 import { isServer } from "solid-js/web";
 
 import { ColorModeProvider, ColorModeScript, cookieStorageManagerSSR } from "@kobalte/core";
@@ -21,10 +23,12 @@ export default function App() {
     <Router
       root={props => (
         <>
-          <ColorModeScript storageType={storageManager.type} />
+          <MetaProvider>
+            <ColorModeScript storageType={storageManager.type} />
             <ColorModeProvider storageManager={storageManager}>
-            <Suspense>{props.children}</Suspense>
-          </ColorModeProvider>
+              <Suspense>{props.children}</Suspense>
+            </ColorModeProvider>
+          </MetaProvider>
         </>
       )}
     >
