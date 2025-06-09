@@ -3,8 +3,13 @@ import { BsApple, BsFacebook, BsGoogle } from "solid-icons/bs";
 import { ModeToggle } from "~/components/mode-toggle";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
+import { showToast } from "~/components/ui/toast";
 
 export default function Login() {
+  function handleLogin() {
+    showToast({ title: "Login successful", variant: "success" })
+  }
+
   return (
     <>
       <MetaProvider>
@@ -27,7 +32,7 @@ export default function Login() {
               <TextFieldInput type="password" />
             </TextField>
 
-            <Button class="w-full mb-4">Login</Button>
+            <Button class="w-full mb-4" onClick={handleLogin}>Login</Button>
 
             <div class="relative mb-4">
               <div class="absolute inset-0 flex items-center">
