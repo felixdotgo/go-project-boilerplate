@@ -1,13 +1,19 @@
 import { MetaProvider, Title } from "@solidjs/meta";
+import { useNavigate } from "@solidjs/router";
 import { BsApple, BsFacebook, BsGoogle } from "solid-icons/bs";
 import { ModeToggle } from "~/components/mode-toggle";
 import { Button } from "~/components/ui/button";
 import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
 import { showToast } from "~/components/ui/toast";
+import { setAuthToken } from "~/lib/auth";
 
 export default function Login() {
+  const navigator = useNavigate();
+
   function handleLogin() {
-    showToast({ title: "Login successful", variant: "success" })
+    showToast({ title: "Login successful", variant: "success" });
+    setAuthToken("test-token");
+    navigator("/", { replace: true });
   }
 
   return (

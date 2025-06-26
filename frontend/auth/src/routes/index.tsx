@@ -1,7 +1,12 @@
 import { MetaProvider, Title } from "@solidjs/meta";
+import { useAction } from "@solidjs/router";
 import { ModeToggle } from "~/components/mode-toggle";
+import { authCheckAction } from "~/lib/auth";
 
 export default function Home() {
+  const authCheck = useAction(authCheckAction)
+  authCheck()
+
   return (
     <>
       <MetaProvider>
