@@ -11,22 +11,22 @@ import { ColorModeProvider, ColorModeScript, cookieStorageManagerSSR } from "@ko
 import { getCookie } from "vinxi/http";
 import { Toaster } from "./components/ui/toast";
 
-function getServerCookies() {
+function getColorMode() {
   "use server"
   const colorMode = getCookie("kb-color-mode")
   return colorMode ? `kb-color-mode=${colorMode}` : "dark"
 }
 
 export default function App() {
-  const storageManager = cookieStorageManagerSSR(isServer ? getServerCookies() : document.cookie)
+  const colorModeStore = cookieStorageManagerSSR(isServer ? getColorMode() : document.cookie)
 
   return (
     <Router
       root={props => (
         <>
           <MetaProvider>
-            <ColorModeScript storageType={storageManager.type} />
-            <ColorModeProvider storageManager={storageManager}>
+            <ColorModeScript storageType={colorModeStore.type} />
+            <ColorModeProvider storageManager={colorModeStore}>
               <Suspense>{props.children}</Suspense>
               <Toaster />
             </ColorModeProvider>
