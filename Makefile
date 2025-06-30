@@ -51,8 +51,8 @@ vendor: ## Run go mod vendor
 	@echo "🎉 $(GREEN)Vendor directory updated$(RESET)"
 
 
-.PHONY: cmdcheck
-cmdcheck:
+.PHONY: check_cmd_var
+check_cmd_var:
 	@if [ -z "$(CMD)" ]; then \
 		echo "❌ $(RED)Error: CMD is not set$(RESET)"; \
 		exit 1; \
@@ -60,13 +60,13 @@ cmdcheck:
 
 
 .PHONY: run
-run: cmdcheck ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
+run: check_cmd_var ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
 	@echo "✨ $(BLUE)Running cmd/$(CMD)...$(RESET)"
 	@go run "cmd/$(CMD)/main.go"
 
 
-.PHONY: dockerfile_check
-dockerfile_check:
+.PHONY: check_docker_file
+check_docker_file:
 	@if [ ! -f "cmd/$(CMD)/Dockerfile" ]; then \
 		echo "❌ $(RED)Error: Dockerfile doesn't exist in cmd/$(CMD). Cannot build.$(RESET)"; \
 		exit 1; \
@@ -81,7 +81,7 @@ generate-proto: ## Generate protobuf code
 
 
 .PHONY: build
-build: cmdcheck dockerfile_check ## Build specific dir inside `cmd` with `make build CMD=<your dir> [PLATFORM=linux/amd64] [BUILD_ARGS="KEY1=value1,KEY2=value2"]`
+build: check_cmd_var check_docker_file ## Build specific dir inside `cmd` with `make build CMD=<your dir> [PLATFORM=linux/amd64] [BUILD_ARGS="KEY1=value1,KEY2=value2"]`
 	@echo "✨ $(BLUE)Building $(CMD) Docker image...$(RESET)"
 	$(eval TIMESTAMP := $(shell date +%Y%m%d-%H%M%S))
 	$(eval PLATFORM ?= linux/amd64)
@@ -97,10 +97,12 @@ up: build ## up: Build and start the service
 	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
 	@cd cmd/$(CMD)/ && docker-compose up
 
+
 .PHONY: upd
 upd: build ## up: Build and start the service (detached mode)
 	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
 	@cd cmd/$(CMD)/ && docker-compose up -d
+
 
 .PHONY: help
 help:  ## Display this help
