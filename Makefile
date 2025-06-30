@@ -10,6 +10,42 @@ RESET := $(shell tput sgr0)
 
 .DEFAULT_GOAL = help
 
+OS := $(shell uname -s)
+
+####################################################################################################
+# Utilities
+####################################################################################################
+.PHONY: check_cmd_var
+check_cmd_var:
+	@if [ -z "$(CMD)" ]; then \
+		echo "❌ $(RED)Error: CMD is not set$(RESET)"; \
+		exit 1; \
+	fi
+
+.PHONY: check_docker_file
+check_docker_file:
+	@if [ ! -f "cmd/$(CMD)/Dockerfile" ]; then \
+		echo "❌ $(RED)Error: Dockerfile doesn't exist in cmd/$(CMD). Cannot build.$(RESET)"; \
+		exit 1; \
+	fi
+
+
+.PHONY: help
+help:  ## Display this help
+	@echo "$(GREEN)╔══════════════════════════════════════════════════════════════╗$(RESET)"
+	@echo "$(GREEN)║                  $(WHITE)Go Project Boilerplate$(RESET)                      $(GREEN)║$(RESET)"
+	@echo "$(GREEN)╚══════════════════════════════════════════════════════════════╝$(RESET)"
+	@echo "$(WHITE)Usage:$(RESET) make $(CYAN)<command>$(RESET)"
+	@echo "$(WHITE)Commands:$(RESET)"
+	@awk 'BEGIN {FS = ":.*##"; } \
+		/^[.a-zA-Z_-]+:.*?##/ { printf "  $(CYAN)%-20s$(RESET) %s\n", $$1, $$2 } \
+		/^##@/ { printf "\n$(WHITE)%s:$(RESET)\n", substr($$0, 5) }' $(MAKEFILE_LIST)
+	@echo "\n$(WHITE)For detailed information about a command, add $(YELLOW)--help$(WHITE) after the command.$(RESET)"
+
+
+####################################################################################################
+# Commands to run core services for development
+####################################################################################################
 .PHONY: docker.down
 docker.down: ## Run docker-compose down
 	@echo "🚧 $(BLUE)Running docker-compose down...$(RESET)"
@@ -30,6 +66,9 @@ docker.upd: ## Run docker-compose up -d
 	@echo "🎉 $(GREEN)Docker containers started in background$(RESET)"
 
 
+####################################################################################################
+# Development commands
+####################################################################################################
 .PHONY: migrate.down
 migrate.down: ## Revert all down migrations
 	@echo "✨ $(YELLOW)Reverting all migrations...$(RESET)"
@@ -51,26 +90,10 @@ vendor: ## Run go mod vendor
 	@echo "🎉 $(GREEN)Vendor directory updated$(RESET)"
 
 
-.PHONY: check_cmd_var
-check_cmd_var:
-	@if [ -z "$(CMD)" ]; then \
-		echo "❌ $(RED)Error: CMD is not set$(RESET)"; \
-		exit 1; \
-	fi
-
-
 .PHONY: run
 run: check_cmd_var ## Run specific dir inside `cmd` with `make run CMD=<your dir>`
 	@echo "✨ $(BLUE)Running cmd/$(CMD)...$(RESET)"
 	@go run "cmd/$(CMD)/main.go"
-
-
-.PHONY: check_docker_file
-check_docker_file:
-	@if [ ! -f "cmd/$(CMD)/Dockerfile" ]; then \
-		echo "❌ $(RED)Error: Dockerfile doesn't exist in cmd/$(CMD). Cannot build.$(RESET)"; \
-		exit 1; \
-	fi
 
 
 .PHONY: generate-proto
@@ -104,14 +127,9 @@ upd: build ## up: Build and start the service (detached mode)
 	@cd cmd/$(CMD)/ && docker-compose up -d
 
 
-.PHONY: help
-help:  ## Display this help
-	@echo "$(GREEN)╔══════════════════════════════════════════════════════════════╗$(RESET)"
-	@echo "$(GREEN)║                  $(WHITE)Go Project Boilerplate$(RESET)                      $(GREEN)║$(RESET)"
-	@echo "$(GREEN)╚══════════════════════════════════════════════════════════════╝$(RESET)"
-	@echo "$(WHITE)Usage:$(RESET) make $(CYAN)<command>$(RESET)"
-	@echo "$(WHITE)Commands:$(RESET)"
-	@awk 'BEGIN {FS = ":.*##"; } \
-		/^[.a-zA-Z_-]+:.*?##/ { printf "  $(CYAN)%-20s$(RESET) %s\n", $$1, $$2 } \
-		/^##@/ { printf "\n$(WHITE)%s:$(RESET)\n", substr($$0, 5) }' $(MAKEFILE_LIST)
-	@echo "\n$(WHITE)For detailed information about a command, add $(YELLOW)--help$(WHITE) after the command.$(RESET)"
+.PHONY: install
+install: ## Install dependencies
+	@echo "✨ $(BLUE)Installing dependencies...$(RESET)"
+	@./scripts/setup_environment.sh
+	@echo "🎉 $(GREEN)Dependencies installed successfully$(RESET)"
+
