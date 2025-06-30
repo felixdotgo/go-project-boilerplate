@@ -7,6 +7,7 @@ MAGENTA := $(shell tput setaf 5)
 CYAN := $(shell tput setaf 6)
 WHITE := $(shell tput setaf 7)
 RESET := $(shell tput sgr0)
+BOLD := $(shell tput bold)
 
 .DEFAULT_GOAL = help
 
@@ -32,9 +33,9 @@ check_docker_file:
 
 .PHONY: help
 help:  ## Display this help
-	@echo "$(GREEN)╔══════════════════════════════════════════════════════════════╗$(RESET)"
-	@echo "$(GREEN)║                  $(WHITE)Go Project Boilerplate$(RESET)                      $(GREEN)║$(RESET)"
-	@echo "$(GREEN)╚══════════════════════════════════════════════════════════════╝$(RESET)"
+	@echo "$(GREEN)$(BOLD)"
+	@cat scripts/banner.txt
+	@echo "$(RESET)"
 	@echo "$(WHITE)Usage:$(RESET) make $(CYAN)<command>$(RESET)"
 	@echo "$(WHITE)Commands:$(RESET)"
 	@awk 'BEGIN {FS = ":.*##"; } \
