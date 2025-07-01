@@ -2,7 +2,7 @@ module github.com/0x46656C6978/go-project-boilerplate
 
 go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.23
 
 require (
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
