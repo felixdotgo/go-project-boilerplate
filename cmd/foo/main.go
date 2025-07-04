@@ -7,6 +7,7 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 func main() {
@@ -25,6 +26,7 @@ func main() {
 
 	// Run handler server
 	server := core.NewHandlerServer(logger)
+	server.AddMiddlewares(testMiddleware())
 
 	server.GetMux().HandlePath(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		w.WriteHeader(http.StatusOK)
@@ -33,3 +35,13 @@ func main() {
 
 	server.Run(conv.ToString(cfg.Port))
 }
+
+func testMiddleware() runtime.Middleware {
+	return func(h runtime.HandlerFunc) runtime.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request, params map[string]string) {
+			// Do something here
+			h(w, r, params)
+		}
+	}
+}
+

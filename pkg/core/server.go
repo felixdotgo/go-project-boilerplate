@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
@@ -14,21 +15,31 @@ import (
 // contains all methods that will be used to bring up the server
 type HandlerServer struct {
 	logger *log.Logger
-	mux *runtime.ServeMux
+	mux    *runtime.ServeMux
 }
 
 // NewHandlerServer returns a new http.ServeMux
 func NewHandlerServer(logger *log.Logger) *HandlerServer {
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithRoutingErrorHandler(func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, code int) {
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Access-Control-Allow-Headers", "*")
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, HEAD, OPTIONS")
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+		}),
+	)
 	runtime.WithMiddlewares(handlerServerLogMiddleware(logger))(mux)
 
 	return &HandlerServer{
 		logger: logger,
-		mux: mux,
+		mux:    mux,
 	}
 }
 
-func handlerServerLogMiddleware(l *log.Logger) (func(h runtime.HandlerFunc) runtime.HandlerFunc) {
+func handlerServerLogMiddleware(l *log.Logger) func(h runtime.HandlerFunc) runtime.HandlerFunc {
 	return func(h runtime.HandlerFunc) runtime.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request, params map[string]string) {
 			l.With(
@@ -59,4 +70,9 @@ func (s *HandlerServer) Run(port string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// AddMiddlewares adds middlewares to the http.ServeMux
+func (s *HandlerServer) AddMiddlewares(middlewares ...runtime.Middleware) {
+	runtime.WithMiddlewares(middlewares...)(s.mux)
 }
