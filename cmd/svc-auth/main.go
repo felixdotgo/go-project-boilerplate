@@ -42,6 +42,7 @@ func main() {
 
 	// Run handler server
 	server := core.NewHandlerServer(logger)
+	server.EnableCORS()
 	serviceServerRegistry(ctx, server, cfg, db)
 	server.Run(conv.ToString(cfg.Port))
 }

@@ -22,6 +22,8 @@ type HandlerServer struct {
 func NewHandlerServer(logger *log.Logger) *HandlerServer {
 	mux := runtime.NewServeMux(
 		runtime.WithRoutingErrorHandler(func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, code int) {
+			// gprc gateway don't generate OPTIONS requests, when mux checking with list handlers it will fail
+			// we're adding this condition to handle OPTIONS requests
 			if r.Method == http.MethodOptions {
 				w.Header().Set("Access-Control-Allow-Headers", "*")
 				w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -48,7 +50,7 @@ func handlerServerLogMiddleware(l *log.Logger) func(h runtime.HandlerFunc) runti
 				"host", r.Host,
 				"path", r.URL.Path,
 				"uri", r.RequestURI,
-				"remote_addr", r.RemoteAddr,
+				"remoteAddr", r.RemoteAddr,
 			).Info("")
 			h(w, r, params)
 		}
@@ -75,4 +77,16 @@ func (s *HandlerServer) Run(port string) {
 // AddMiddlewares adds middlewares to the http.ServeMux
 func (s *HandlerServer) AddMiddlewares(middlewares ...runtime.Middleware) {
 	runtime.WithMiddlewares(middlewares...)(s.mux)
+}
+
+// EnableCORS enables CORS for service that need it
+func (s *HandlerServer) EnableCORS() {
+	s.AddMiddlewares(func(h runtime.HandlerFunc) runtime.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request, params map[string]string) {
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, HEAD, OPTIONS")
+			h(w, r, params)
+		}
+	})
 }
