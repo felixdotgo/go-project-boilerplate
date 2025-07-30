@@ -6,9 +6,15 @@ services:
         IMAGE_NAME_TAG: ${IMAGE_NAME_TAG}
       context: ../../
       dockerfile: cmd/foo/Dockerfile
+    image: foo/backend
     ports:
       - "8000:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.foo.rule=Host(`foo-service.localhost`)"
       - "traefik.http.services.foo.loadbalancer.server.port=8000"
+
+networks:
+  gpnetwork:
+    external: true
+    name: gpnetwork

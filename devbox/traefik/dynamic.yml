@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /certs/meallate.localhost.pem
+      keyFile: /certs/mealmate.localhost-key.pem

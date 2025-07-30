@@ -70,6 +70,20 @@ docker.upd: ## Run docker-compose up -d
 ####################################################################################################
 # Development commands
 ####################################################################################################
+.PHONY: certs
+certs: ## Generate SSL certificates with mkcert for .loc domains
+	@echo "$(CYAN)Creating certificates directory...$(RESET)"
+	@mkdir -p devbox/certs
+	@echo "$(CYAN)Generating SSL certificates for goproject.local domains...$(RESET)"
+	@cd devbox/certs && mkcert -cert-file goproject.local.pem -key-file goproject.local-key.pem "*.goproject.local" goproject.local traefik.goproject.local
+	@echo "$(CYAN)Installing mkcert CA...$(RESET)"
+	@mkcert -install
+	@echo "$(GREEN)SSL certificates generated successfully!$(RESET)"
+	@echo "$(YELLOW)Certificate files:$(RESET)"
+	@echo "  - $(WHITE)certs/goproject.local.pem$(RESET) (certificate)"
+	@echo "  - $(WHITE)certs/goproject.local-key.pem$(RESET) (private key)"
+
+
 .PHONY: migrate.down
 migrate.down: ## Revert all down migrations
 	@echo "✨ $(YELLOW)Reverting all migrations...$(RESET)"

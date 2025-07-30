@@ -1,0 +1,41 @@
+services:
+  coredns:
+    image: coredns/coredns:1.11.1
+    container_name: coredns
+    networks:
+      - gpnetwork
+    volumes:
+      - ./coredns/Corefile:/Corefile
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    command: -conf /Corefile
+    restart: unless-stopped
+
+  traefik:
+    image: traefik:v2.11
+    container_name: traefik
+    restart: unless-stopped
+    networks:
+      - gpnetwork
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Traefik dashboard
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.goproject.local`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.service=api@internal"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs:/certs
+
+networks:
+  gpnetwork:
+    external: true
+    name: gpnetwork

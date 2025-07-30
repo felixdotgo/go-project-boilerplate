@@ -6,6 +6,7 @@ services:
         IMAGE_NAME_TAG: ${IMAGE_NAME_TAG}
       context: ../../
       dockerfile: cmd/svc-auth/Dockerfile
+    image: svc-auth/backend
     ports:
       - "8000:8000"
     labels:

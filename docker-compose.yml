@@ -54,4 +54,5 @@ services:
 
 networks:
   gpnetwork:
+    external: true
     name: gpnetwork
