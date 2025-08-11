@@ -1,7 +1,6 @@
 package core
 
 import (
-	"flag"
 	"regexp"
 
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
@@ -15,13 +14,7 @@ type ServiceBase struct {
 
 // NewService returns a new ServiceBase
 func NewService(name string) *ServiceBase {
-	debug := false
-	if flag.Lookup("debug") == nil {
-		debug = *flag.Bool("debug", false, "sets log level to debug")
-	}
-	flag.Parse()
-
-	l := log.NewLogger(debug)
+	l := log.NewLogger(false)
 
 	re, err := regexp.Compile(`^[a-zA-Z.]+$`)
 	if err != nil {
