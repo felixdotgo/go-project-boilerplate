@@ -1,6 +1,49 @@
 # Golang project boilerplate
 This repo's name explain itself. Still have a lot of things todo
 
+## Project Structure
+
+```
+.
+├── api/                    # API specifications
+│   └── openapi/           # OpenAPI/Swagger definitions
+├── cmd/                   # Application entry points
+│   ├── foo/              # Example service
+│   └── svc-auth/         # Authentication service
+│       ├── cmd/          # Service-specific commands
+│       ├── config/       # Configuration management
+│       ├── entity/       # Domain entities
+│       ├── httpapi/      # HTTP API handlers
+│       ├── migrations/   # Database migrations
+│       ├── repository/   # Data access layer
+│       └── service/      # Business logic layer
+├── frontend/             # Frontend applications
+│   └── auth/            # Authentication frontend (React/TypeScript)
+├── pkg/                  # Shared Go packages
+│   ├── conv/            # Conversion utilities
+│   ├── core/            # Core abstractions (server, repository, service base)
+│   ├── log/             # Logging utilities
+│   ├── migrator/        # Database migration tools
+│   └── tools/           # Build tools and dependencies
+├── proto/               # Protocol Buffer definitions
+│   ├── api/            # API service definitions
+│   ├── common/         # Shared proto definitions
+│   └── models/         # Data model definitions
+├── rpc/                # Generated gRPC code (auto-generated from proto/)
+├── scripts/            # Build and setup scripts
+├── devenv/             # Development environment configuration
+└── init/               # Initialization files
+```
+
+### Key Directories
+
+- **`cmd/`**: Contains the main applications. Each subdirectory represents a separate microservice
+- **`pkg/`**: Reusable Go packages shared across services
+- **`proto/`**: Protocol Buffer definitions for gRPC services
+- **`rpc/`**: Auto-generated Go code from protobuf definitions
+- **`frontend/`**: Web frontend applications (React/TypeScript with Tailwind CSS)
+- **`api/`**: API documentation and specifications
+
 # Getting started
 Before we start please make sure you have already installed these pieces of software
 - Go >= 1.23.0
