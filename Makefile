@@ -48,16 +48,22 @@ help:  ## Display this help
 # Commands to run core services for development
 ####################################################################################################
 .PHONY: docker.down
-docker.down: ## Run docker-compose down
-	@echo "🚧 $(BLUE)Running docker-compose down...$(RESET)"
-	@cd devenv && docker-compose down
-	@echo "🎉 $(GREEN)Docker containers stopped and removed$(RESET)"
+docker.down: ## Run docker compose down and clean up network
+	@echo "🚧 $(BLUE)Running docker compose down...$(RESET)"
+	@cd devenv && docker compose down
+	@echo "🧹 $(BLUE)Cleaning up network...$(RESET)"
+	@docker network inspect gpnetwork >/dev/null 2>&1 && \
+		(echo "📡 $(YELLOW)Removing gpnetwork...$(RESET)" && docker network rm gpnetwork) || true
+	@echo "🎉 $(GREEN)Docker containers and network cleaned up$(RESET)"
 
 
 .PHONY: docker.up
-docker.up: ## Run docker-compose up -d
-	@echo "🚀 $(BLUE)Starting docker-compose in detached mode...$(RESET)"
-	@cd devenv && docker-compose up -d
+docker.up: ## Run docker compose up -d (creates network if needed)
+	@echo "🔍 $(BLUE)Checking if gpnetwork exists...$(RESET)"
+	@docker network inspect gpnetwork >/dev/null 2>&1 || \
+		(echo "📡 $(YELLOW)Creating gpnetwork...$(RESET)" && docker network create gpnetwork)
+	@echo "🚀 $(BLUE)Starting docker compose in detached mode...$(RESET)"
+	@cd devenv && DOCKER_BUILDKIT=1 docker compose up -d
 	@echo "🎉 $(GREEN)Docker containers started in background$(RESET)"
 
 
@@ -65,17 +71,17 @@ docker.up: ## Run docker-compose up -d
 # Development commands
 ####################################################################################################
 .PHONY: certs
-certs: ## Generate SSL certificates with mkcert for .loc domains
+certs: ## Generate SSL certificates with mkcert for .localhost domains
 	@echo "$(CYAN)Creating certificates directory...$(RESET)"
 	@mkdir -p devenv/certs
-	@echo "$(CYAN)Generating SSL certificates for goproject.local domains...$(RESET)"
-	@cd devenv/certs && mkcert -cert-file goproject.local.pem -key-file goproject.local-key.pem "*.goproject.local" goproject.local traefik.goproject.local
+	@echo "$(CYAN)Generating SSL certificates for goproject.localhost domains...$(RESET)"
+	@cd devenv/certs && mkcert -cert-file goproject.localhost.pem -key-file goproject.localhost-key.pem "*.goproject.localhost" goproject.localhost traefik.goproject.localhost
 	@echo "$(CYAN)Installing mkcert CA...$(RESET)"
 	@mkcert -install
 	@echo "$(GREEN)SSL certificates generated successfully!$(RESET)"
 	@echo "$(YELLOW)Certificate files:$(RESET)"
-	@echo "  - $(WHITE)certs/goproject.local.pem$(RESET) (certificate)"
-	@echo "  - $(WHITE)certs/goproject.local-key.pem$(RESET) (private key)"
+	@echo "  - $(WHITE)certs/goproject.localhost.pem$(RESET) (certificate)"
+	@echo "  - $(WHITE)certs/goproject.localhost-key.pem$(RESET) (private key)"
 
 
 
@@ -107,20 +113,20 @@ build: check_cmd_var check_docker_file ## Build specific dir inside `cmd` with `
 	$(eval PARSED_ARGS := $(shell echo "$(BUILD_ARGS)" | sed 's/,/ --build-arg /g'))
 	$(eval BUILD_ARGUMENTS := $(if $(BUILD_ARGS), $(PARSED_ARGS),))
 
-	@cd cmd/$(CMD)/ && docker-compose build --build-arg PLATFORM="$(PLATFORM)" $(BUILD_ARGUMENTS) || { echo "❌ $(RED)Docker build failed for $(CMD)$(RESET)" && cd - > /dev/null; exit 1; }
+	@cd cmd/$(CMD)/ && DOCKER_BUILDKIT=1 docker compose build --build-arg PLATFORM="$(PLATFORM)" $(BUILD_ARGUMENTS) || { echo "❌ $(RED)Docker build failed for $(CMD)$(RESET)" && cd - > /dev/null; exit 1; }
 	@echo "🎉 $(GREEN)Successfully built $(CMD) image$(RESET)"
 
 
 .PHONY: up
 up: build ## up: Build and start the service
 	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
-	@cd cmd/$(CMD)/ && docker-compose up
+	@cd cmd/$(CMD)/ && docker compose up
 
 
 .PHONY: upd
 upd: build ## up: Build and start the service (detached mode)
 	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
-	@cd cmd/$(CMD)/ && docker-compose up -d
+	@cd cmd/$(CMD)/ && docker compose up -d
 
 
 .PHONY: install

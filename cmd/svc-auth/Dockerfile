@@ -3,12 +3,15 @@ FROM golang:1.23 AS build
 WORKDIR /app
 
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 COPY ./pkg/ ./pkg
 COPY ./rpc/ ./rpc
 COPY cmd/svc-auth ./cmd/svc-auth
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /server ./cmd/svc-auth/main.go
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    CGO_ENABLED=0 GOOS=linux go build -o /server ./cmd/svc-auth/main.go
 
 
 FROM alpine:3.21 AS run

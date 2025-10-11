@@ -13,6 +13,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.foo.rule=Host(`foo-service.localhost`)"
       - "traefik.http.services.foo.loadbalancer.server.port=8000"
+    networks:
+      - gpnetwork
 
 networks:
   gpnetwork:

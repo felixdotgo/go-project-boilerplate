@@ -1,4 +1,4 @@
 tls:
   certificates:
-    - certFile: /certs/meallate.localhost.pem
-      keyFile: /certs/mealmate.localhost-key.pem
+    - certFile: /certs/goproject.localhost.pem
+      keyFile: /certs/goproject.localhost-key.pem
