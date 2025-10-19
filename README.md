@@ -92,3 +92,18 @@ then run
 ```
 sudo systemctl restart systemd-resolved
 ```
+
+### For Windows (WSL2)
+
+Create `.wslconfig` with the following content
+```
+[wsl2]
+networkingMode=default
+localhostForwarding=true
+```
+Shutdown and restart WSL2
+
+In Docker Desktop, go to Settings > Resources > WSL Integration, then disable and re-enable integration for your WSL2 distro.
+
+Uncomment the `insecure: true` line in `devenv/traefik/traefik.yml` to enable insecure access to the Traefik dashboard.
+

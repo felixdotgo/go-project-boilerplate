@@ -13,6 +13,8 @@ entryPoints:
 
 api:
   dashboard: true
+  # Uncomment the following line to enable insecure access to the dashboard when using Windows and WSL2
+  #insecure: true
 
 providers:
   docker: {}
