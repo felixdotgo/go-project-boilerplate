@@ -1,8 +1,8 @@
 module github.com/0x46656C6978/go-project-boilerplate
 
-go 1.23.0
+go 1.24.0
 
-toolchain go1.23
+toolchain go1.24.11
 
 require (
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
@@ -15,6 +15,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	golang.org/x/crypto v0.33.0
 	golang.org/x/net v0.35.0
+	golang.org/x/oauth2 v0.34.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
 	google.golang.org/protobuf v1.36.5
@@ -23,6 +24,7 @@ require (
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

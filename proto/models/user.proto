@@ -10,6 +10,18 @@ message User {
   string id = 1;
   string email = 2;
 
+  // Profile information
+  string name = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string avatar_url = 6;
+  bool email_verified = 7;
+  string locale = 8;
+
+  // Auth metadata
+  bool has_password = 9;                // Whether user has email/password auth
+  repeated string linked_providers = 10; // ["google", "facebook", "github"]
+
   google.protobuf.Timestamp createdAt = 100;
   google.protobuf.Timestamp updatedAt = 101;
 }

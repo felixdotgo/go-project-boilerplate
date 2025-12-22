@@ -16,6 +16,15 @@ message Auth {
     string message = 1;
   }
 
+  // OAuth2-compliant token response
+  message TokenResponse {
+    string access_token = 1;   // JWT access token
+    string refresh_token = 2;  // Opaque refresh token
+    string token_type = 3;     // Always "Bearer"
+    int64 expires_in = 4;      // Seconds until expiration
+    string scope = 5;          // Space-separated scopes
+  }
+
   message AuthData {
     models.User user = 1;
     string token = 2;
@@ -51,7 +60,88 @@ message Auth {
   }
 
   message LoginResponse {
-    LoginResponseData data = 1;
+    TokenResponse data = 1;
+    models.User user = 2;
+    common.Error error = 3;
+  }
+
+  // Refresh token request/response
+  message RefreshTokenRequest {
+    string refresh_token = 1;
+  }
+
+  message RefreshTokenResponse {
+    TokenResponse data = 1;
+    common.Error error = 2;
+  }
+
+  // Revoke token request/response
+  message RevokeTokenRequest {
+    string token = 1;  // Refresh token to revoke
+  }
+
+  message RevokeTokenResponse {
+    common.Error error = 1;
+  }
+
+  // OAuth login request/response
+  message OAuthLoginRequest {
+    string provider = 1;       // "google", "facebook", "github"
+    string state = 2;          // CSRF protection state (client-generated)
+    string redirect_uri = 3;   // Optional redirect URI override
+  }
+
+  message OAuthLoginResponse {
+    string authorization_url = 1;  // Redirect user to this URL
+    common.Error error = 2;
+  }
+
+  // OAuth callback request/response
+  message OAuthCallbackRequest {
+    string provider = 1;
+    string code = 2;           // Authorization code from provider
+    string state = 3;          // Verify against stored state
+    string redirect_uri = 4;   // Must match the one used in OAuthLogin
+  }
+
+  message OAuthCallbackResponse {
+    TokenResponse data = 1;
+    models.User user = 2;
+    bool is_new_user = 3;
+    common.Error error = 4;
+  }
+
+  // Link OAuth provider request/response
+  message LinkProviderRequest {
+    string provider = 1;
+    string code = 2;
+    string redirect_uri = 3;
+  }
+
+  message LinkProviderResponse {
+    bool success = 1;
+    string message = 2;
+    common.Error error = 3;
+  }
+
+  // Unlink OAuth provider request/response
+  message UnlinkProviderRequest {
+    string provider = 1;
+  }
+
+  message UnlinkProviderResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string linked_providers = 3;
+    common.Error error = 4;
+  }
+
+  // Get linked providers request/response
+  // Get linked providers request/response
+  message GetProvidersRequest {}
+
+  message GetProvidersResponse {
+    repeated string providers = 1;
     common.Error error = 2;
   }
 }
@@ -77,6 +167,58 @@ service AuthService {
     option (google.api.http) = {
       post: "/v1/auth/login"
       body: "data"
+    };
+  }
+
+  // Refresh access token
+  rpc RefreshToken(Auth.RefreshTokenRequest) returns (Auth.RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // Revoke refresh token
+  rpc RevokeToken(Auth.RevokeTokenRequest) returns (Auth.RevokeTokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/revoke"
+      body: "*"
+    };
+  }
+
+  // Initiate OAuth login flow
+  rpc OAuthLogin(Auth.OAuthLoginRequest) returns (Auth.OAuthLoginResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/oauth/{provider}/login"
+    };
+  }
+
+  // Handle OAuth callback
+  rpc OAuthCallback(Auth.OAuthCallbackRequest) returns (Auth.OAuthCallbackResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/oauth/{provider}/callback"
+    };
+  }
+
+  // Link OAuth provider to current user
+  rpc LinkProvider(Auth.LinkProviderRequest) returns (Auth.LinkProviderResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/link/{provider}"
+      body: "*"
+    };
+  }
+
+  // Unlink OAuth provider from current user
+  rpc UnlinkProvider(Auth.UnlinkProviderRequest) returns (Auth.UnlinkProviderResponse) {
+    option (google.api.http) = {
+      delete: "/v1/auth/unlink/{provider}"
+    };
+  }
+
+  // Get linked providers for current user
+  rpc GetProviders(Auth.GetProvidersRequest) returns (Auth.GetProvidersResponse) {
+    option (google.api.http) = {
+      get: "/v1/auth/providers"
     };
   }
 }

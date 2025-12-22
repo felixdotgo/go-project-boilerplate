@@ -66,7 +66,7 @@ func getDBConnection(cfg *config.Config) (*gorm.DB, error) {
 
 func serviceServerRegistry(ctx context.Context, server *core.HandlerServer, cfg *config.Config, db *gorm.DB) {
 	authRepo := repository.NewUserRepo(db)
-	authSvc := service.NewUserService(authRepo)
+	authSvc := service.NewUserService(cfg, authRepo)
 	authApi := httpapi.NewAuthServiceServer(cfg, authSvc)
 
 	// APIs register

@@ -22,21 +22,85 @@ type DB struct {
 
 // JWT is configurations for JSON Web Token
 type JWT struct {
-	Secret string `mapstructure:"jwt_secret"`
-	Expire string `mapstructure:"jwt_expire"`
-	Issuer string `mapstructure:"jwt_issuer"`
+	Secret          string `mapstructure:"jwt_secret"`
+	Expire          string `mapstructure:"jwt_expire"`
+	Issuer          string `mapstructure:"jwt_issuer"`
+	AccessTokenTTL  string `mapstructure:"jwt_access_token_ttl"`  // Default: 1h
+	RefreshTokenTTL string `mapstructure:"jwt_refresh_token_ttl"` // Default: 720h (30 days)
+	EncryptionKey   string `mapstructure:"oauth_encryption_key"`  // For encrypting OAuth provider tokens
 }
 
 // OAuth contains all configurations that related to OAuth
 type OAuth struct {
-	Google OAuthGoogle `mapstructure:",squash"`
+	RedirectURL string              `mapstructure:"oauth_redirect_url"`
+	Google      GoogleOAuthConfig   `mapstructure:",squash"`
+	Facebook    FacebookOAuthConfig `mapstructure:",squash"`
+	GitHub      GitHubOAuthConfig   `mapstructure:",squash"`
 }
 
-// OAuthGoogle contains configs that will be used to make an auth request to Google
-type OAuthGoogle struct {
-	ClientID     string `mapstructure:"oauth_google_client_id"`
-	ClientSecret string `mapstructure:"oauth_google_client_secret"`
-	RedirectURL  string `mapstructure:"oauth_redirect_url"`
+type OAuther interface {
+	IsEnabled() bool
+	GetScopes() []string
+}
+
+// GoogleOAuthConfig contains configs for Google OAuth provider
+type GoogleOAuthConfig struct {
+	ClientID     string   `mapstructure:"oauth_google_client_id"`
+	ClientSecret string   `mapstructure:"oauth_google_client_secret"`
+	RedirectURL  string   `mapstructure:"oauth_google_redirect_url"`
+	Scopes       string `mapstructure:"oauth_google_scopes"`
+	Enabled      string   `mapstructure:"oauth_google_enabled"`
+}
+
+func (o *GoogleOAuthConfig) IsEnabled() bool {
+	return strings.ToLower(o.Enabled) == "true"
+}
+
+func (o *GoogleOAuthConfig) GetScopes() []string {
+	if o.Scopes == "" {
+		return []string{}
+	}
+	return strings.Split(o.Scopes, " ")
+}
+
+// FacebookOAuthConfig contains configs for Facebook OAuth provider
+type FacebookOAuthConfig struct {
+	ClientID     string   `mapstructure:"oauth_facebook_client_id"`
+	ClientSecret string   `mapstructure:"oauth_facebook_client_secret"`
+	RedirectURL  string   `mapstructure:"oauth_facebook_redirect_url"`
+	Scopes       string `mapstructure:"oauth_facebook_scopes"`
+	Enabled      string   `mapstructure:"oauth_facebook_enabled"`
+}
+
+func (o *FacebookOAuthConfig) IsEnabled() bool {
+	return strings.ToLower(o.Enabled) == "true"
+}
+
+func (o *FacebookOAuthConfig) GetScopes() []string {
+	if o.Scopes == "" {
+		return []string{}
+	}
+	return strings.Split(o.Scopes, " ")
+}
+
+// GitHubOAuthConfig contains configs for GitHub OAuth provider
+type GitHubOAuthConfig struct {
+	ClientID     string   `mapstructure:"oauth_github_client_id"`
+	ClientSecret string   `mapstructure:"oauth_github_client_secret"`
+	RedirectURL  string   `mapstructure:"oauth_github_redirect_url"`
+	Scopes       string `mapstructure:"oauth_github_scopes"`
+	Enabled      string   `mapstructure:"oauth_github_enabled"`
+}
+
+func (o *GitHubOAuthConfig) IsEnabled() bool {
+	return strings.ToLower(o.Enabled) == "true"
+}
+
+func (o *GitHubOAuthConfig) GetScopes() []string {
+	if o.Scopes == "" {
+		return []string{}
+	}
+	return strings.Split(o.Scopes, " ")
 }
 
 // Config is a struct that contains all other configurations that will be defined later

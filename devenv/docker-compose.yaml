@@ -35,6 +35,21 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
       - ./certs:/certs:Z
 
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    restart: unless-stopped
+    networks:
+      - gpnetwork
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data:Z
+
 networks:
   gpnetwork:
     external: true

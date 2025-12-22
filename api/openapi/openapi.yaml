@@ -6,6 +6,37 @@ info:
     title: AuthService API
     version: 0.0.1
 paths:
+    /v1/auth/link/{provider}:
+        post:
+            tags:
+                - AuthService
+            description: Link OAuth provider to current user
+            operationId: AuthService_LinkProvider
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Auth_LinkProviderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_LinkProviderResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /v1/auth/login:
         post:
             tags:
@@ -31,6 +62,76 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /v1/auth/oauth/{provider}/callback:
+        get:
+            tags:
+                - AuthService
+            description: Handle OAuth callback
+            operationId: AuthService_OAuthCallback
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: code
+                  in: query
+                  schema:
+                    type: string
+                - name: state
+                  in: query
+                  schema:
+                    type: string
+                - name: redirectUri
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_OAuthCallbackResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/auth/oauth/{provider}/login:
+        get:
+            tags:
+                - AuthService
+            description: Initiate OAuth login flow
+            operationId: AuthService_OAuthLogin
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: state
+                  in: query
+                  schema:
+                    type: string
+                - name: redirectUri
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_OAuthLoginResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /v1/auth/ping:
         get:
             tags:
@@ -44,6 +145,50 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Auth_PingResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/auth/providers:
+        get:
+            tags:
+                - AuthService
+            description: Get linked providers for current user
+            operationId: AuthService_GetProviders
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_GetProvidersResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/auth/refresh:
+        post:
+            tags:
+                - AuthService
+            description: Refresh access token
+            operationId: AuthService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Auth_RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_RefreshTokenResponse'
                 default:
                     description: Default error response
                     content:
@@ -75,6 +220,56 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /v1/auth/revoke:
+        post:
+            tags:
+                - AuthService
+            description: Revoke refresh token
+            operationId: AuthService_RevokeToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Auth_RevokeTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_RevokeTokenResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/auth/unlink/{provider}:
+        delete:
+            tags:
+                - AuthService
+            description: Unlink OAuth provider from current user
+            operationId: AuthService_UnlinkProvider
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Auth_UnlinkProviderResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
     schemas:
         Auth_AuthData:
@@ -84,6 +279,34 @@ components:
                     $ref: '#/components/schemas/User'
                 token:
                     type: string
+        Auth_GetProvidersResponse:
+            type: object
+            properties:
+                providers:
+                    type: array
+                    items:
+                        type: string
+                error:
+                    $ref: '#/components/schemas/Error'
+        Auth_LinkProviderRequest:
+            type: object
+            properties:
+                provider:
+                    type: string
+                code:
+                    type: string
+                redirectUri:
+                    type: string
+            description: Link OAuth provider request/response
+        Auth_LinkProviderResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                error:
+                    $ref: '#/components/schemas/Error'
         Auth_LoginRequestData:
             type: object
             properties:
@@ -95,21 +318,47 @@ components:
             type: object
             properties:
                 data:
-                    $ref: '#/components/schemas/Auth_LoginResponseData'
-                error:
-                    $ref: '#/components/schemas/Error'
-        Auth_LoginResponseData:
-            type: object
-            properties:
+                    $ref: '#/components/schemas/Auth_TokenResponse'
                 user:
                     $ref: '#/components/schemas/User'
-                token:
+                error:
+                    $ref: '#/components/schemas/Error'
+        Auth_OAuthCallbackResponse:
+            type: object
+            properties:
+                data:
+                    $ref: '#/components/schemas/Auth_TokenResponse'
+                user:
+                    $ref: '#/components/schemas/User'
+                isNewUser:
+                    type: boolean
+                error:
+                    $ref: '#/components/schemas/Error'
+        Auth_OAuthLoginResponse:
+            type: object
+            properties:
+                authorizationUrl:
                     type: string
+                error:
+                    $ref: '#/components/schemas/Error'
         Auth_PingResponse:
             type: object
             properties:
                 message:
                     type: string
+        Auth_RefreshTokenRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+            description: Refresh token request/response
+        Auth_RefreshTokenResponse:
+            type: object
+            properties:
+                data:
+                    $ref: '#/components/schemas/Auth_TokenResponse'
+                error:
+                    $ref: '#/components/schemas/Error'
         Auth_RegisterRequestData:
             type: object
             properties:
@@ -124,6 +373,44 @@ components:
             properties:
                 data:
                     $ref: '#/components/schemas/Auth_AuthData'
+                error:
+                    $ref: '#/components/schemas/Error'
+        Auth_RevokeTokenRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+            description: Revoke token request/response
+        Auth_RevokeTokenResponse:
+            type: object
+            properties:
+                error:
+                    $ref: '#/components/schemas/Error'
+        Auth_TokenResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                tokenType:
+                    type: string
+                expiresIn:
+                    type: string
+                scope:
+                    type: string
+            description: OAuth2-compliant token response
+        Auth_UnlinkProviderResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                linkedProviders:
+                    type: array
+                    items:
+                        type: string
                 error:
                     $ref: '#/components/schemas/Error'
         Error:
@@ -164,6 +451,26 @@ components:
                     type: string
                 email:
                     type: string
+                name:
+                    type: string
+                    description: Profile information
+                firstName:
+                    type: string
+                lastName:
+                    type: string
+                avatarUrl:
+                    type: string
+                emailVerified:
+                    type: boolean
+                locale:
+                    type: string
+                hasPassword:
+                    type: boolean
+                    description: Auth metadata
+                linkedProviders:
+                    type: array
+                    items:
+                        type: string
                 createdAt:
                     type: string
                     format: date-time

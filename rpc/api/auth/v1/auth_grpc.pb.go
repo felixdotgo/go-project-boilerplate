@@ -19,9 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_Ping_FullMethodName     = "/api.auth.v1.AuthService/Ping"
-	AuthService_Register_FullMethodName = "/api.auth.v1.AuthService/Register"
-	AuthService_Login_FullMethodName    = "/api.auth.v1.AuthService/Login"
+	AuthService_Ping_FullMethodName           = "/api.auth.v1.AuthService/Ping"
+	AuthService_Register_FullMethodName       = "/api.auth.v1.AuthService/Register"
+	AuthService_Login_FullMethodName          = "/api.auth.v1.AuthService/Login"
+	AuthService_RefreshToken_FullMethodName   = "/api.auth.v1.AuthService/RefreshToken"
+	AuthService_RevokeToken_FullMethodName    = "/api.auth.v1.AuthService/RevokeToken"
+	AuthService_OAuthLogin_FullMethodName     = "/api.auth.v1.AuthService/OAuthLogin"
+	AuthService_OAuthCallback_FullMethodName  = "/api.auth.v1.AuthService/OAuthCallback"
+	AuthService_LinkProvider_FullMethodName   = "/api.auth.v1.AuthService/LinkProvider"
+	AuthService_UnlinkProvider_FullMethodName = "/api.auth.v1.AuthService/UnlinkProvider"
+	AuthService_GetProviders_FullMethodName   = "/api.auth.v1.AuthService/GetProviders"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -34,6 +41,20 @@ type AuthServiceClient interface {
 	Register(ctx context.Context, in *Auth_RegisterRequest, opts ...grpc.CallOption) (*Auth_RegisterResponse, error)
 	// Handle login requests
 	Login(ctx context.Context, in *Auth_LoginRequest, opts ...grpc.CallOption) (*Auth_LoginResponse, error)
+	// Refresh access token
+	RefreshToken(ctx context.Context, in *Auth_RefreshTokenRequest, opts ...grpc.CallOption) (*Auth_RefreshTokenResponse, error)
+	// Revoke refresh token
+	RevokeToken(ctx context.Context, in *Auth_RevokeTokenRequest, opts ...grpc.CallOption) (*Auth_RevokeTokenResponse, error)
+	// Initiate OAuth login flow
+	OAuthLogin(ctx context.Context, in *Auth_OAuthLoginRequest, opts ...grpc.CallOption) (*Auth_OAuthLoginResponse, error)
+	// Handle OAuth callback
+	OAuthCallback(ctx context.Context, in *Auth_OAuthCallbackRequest, opts ...grpc.CallOption) (*Auth_OAuthCallbackResponse, error)
+	// Link OAuth provider to current user
+	LinkProvider(ctx context.Context, in *Auth_LinkProviderRequest, opts ...grpc.CallOption) (*Auth_LinkProviderResponse, error)
+	// Unlink OAuth provider from current user
+	UnlinkProvider(ctx context.Context, in *Auth_UnlinkProviderRequest, opts ...grpc.CallOption) (*Auth_UnlinkProviderResponse, error)
+	// Get linked providers for current user
+	GetProviders(ctx context.Context, in *Auth_GetProvidersRequest, opts ...grpc.CallOption) (*Auth_GetProvidersResponse, error)
 }
 
 type authServiceClient struct {
@@ -74,6 +95,76 @@ func (c *authServiceClient) Login(ctx context.Context, in *Auth_LoginRequest, op
 	return out, nil
 }
 
+func (c *authServiceClient) RefreshToken(ctx context.Context, in *Auth_RefreshTokenRequest, opts ...grpc.CallOption) (*Auth_RefreshTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_RefreshTokenResponse)
+	err := c.cc.Invoke(ctx, AuthService_RefreshToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) RevokeToken(ctx context.Context, in *Auth_RevokeTokenRequest, opts ...grpc.CallOption) (*Auth_RevokeTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_RevokeTokenResponse)
+	err := c.cc.Invoke(ctx, AuthService_RevokeToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) OAuthLogin(ctx context.Context, in *Auth_OAuthLoginRequest, opts ...grpc.CallOption) (*Auth_OAuthLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_OAuthLoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_OAuthLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) OAuthCallback(ctx context.Context, in *Auth_OAuthCallbackRequest, opts ...grpc.CallOption) (*Auth_OAuthCallbackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_OAuthCallbackResponse)
+	err := c.cc.Invoke(ctx, AuthService_OAuthCallback_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) LinkProvider(ctx context.Context, in *Auth_LinkProviderRequest, opts ...grpc.CallOption) (*Auth_LinkProviderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_LinkProviderResponse)
+	err := c.cc.Invoke(ctx, AuthService_LinkProvider_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) UnlinkProvider(ctx context.Context, in *Auth_UnlinkProviderRequest, opts ...grpc.CallOption) (*Auth_UnlinkProviderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_UnlinkProviderResponse)
+	err := c.cc.Invoke(ctx, AuthService_UnlinkProvider_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GetProviders(ctx context.Context, in *Auth_GetProvidersRequest, opts ...grpc.CallOption) (*Auth_GetProvidersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Auth_GetProvidersResponse)
+	err := c.cc.Invoke(ctx, AuthService_GetProviders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -84,6 +175,20 @@ type AuthServiceServer interface {
 	Register(context.Context, *Auth_RegisterRequest) (*Auth_RegisterResponse, error)
 	// Handle login requests
 	Login(context.Context, *Auth_LoginRequest) (*Auth_LoginResponse, error)
+	// Refresh access token
+	RefreshToken(context.Context, *Auth_RefreshTokenRequest) (*Auth_RefreshTokenResponse, error)
+	// Revoke refresh token
+	RevokeToken(context.Context, *Auth_RevokeTokenRequest) (*Auth_RevokeTokenResponse, error)
+	// Initiate OAuth login flow
+	OAuthLogin(context.Context, *Auth_OAuthLoginRequest) (*Auth_OAuthLoginResponse, error)
+	// Handle OAuth callback
+	OAuthCallback(context.Context, *Auth_OAuthCallbackRequest) (*Auth_OAuthCallbackResponse, error)
+	// Link OAuth provider to current user
+	LinkProvider(context.Context, *Auth_LinkProviderRequest) (*Auth_LinkProviderResponse, error)
+	// Unlink OAuth provider from current user
+	UnlinkProvider(context.Context, *Auth_UnlinkProviderRequest) (*Auth_UnlinkProviderResponse, error)
+	// Get linked providers for current user
+	GetProviders(context.Context, *Auth_GetProvidersRequest) (*Auth_GetProvidersResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -102,6 +207,27 @@ func (UnimplementedAuthServiceServer) Register(context.Context, *Auth_RegisterRe
 }
 func (UnimplementedAuthServiceServer) Login(context.Context, *Auth_LoginRequest) (*Auth_LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *Auth_RefreshTokenRequest) (*Auth_RefreshTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedAuthServiceServer) RevokeToken(context.Context, *Auth_RevokeTokenRequest) (*Auth_RevokeTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeToken not implemented")
+}
+func (UnimplementedAuthServiceServer) OAuthLogin(context.Context, *Auth_OAuthLoginRequest) (*Auth_OAuthLoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OAuthLogin not implemented")
+}
+func (UnimplementedAuthServiceServer) OAuthCallback(context.Context, *Auth_OAuthCallbackRequest) (*Auth_OAuthCallbackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OAuthCallback not implemented")
+}
+func (UnimplementedAuthServiceServer) LinkProvider(context.Context, *Auth_LinkProviderRequest) (*Auth_LinkProviderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LinkProvider not implemented")
+}
+func (UnimplementedAuthServiceServer) UnlinkProvider(context.Context, *Auth_UnlinkProviderRequest) (*Auth_UnlinkProviderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnlinkProvider not implemented")
+}
+func (UnimplementedAuthServiceServer) GetProviders(context.Context, *Auth_GetProvidersRequest) (*Auth_GetProvidersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProviders not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -178,6 +304,132 @@ func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).RefreshToken(ctx, req.(*Auth_RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_RevokeToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_RevokeTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).RevokeToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_RevokeToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).RevokeToken(ctx, req.(*Auth_RevokeTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_OAuthLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_OAuthLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).OAuthLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_OAuthLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).OAuthLogin(ctx, req.(*Auth_OAuthLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_OAuthCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_OAuthCallbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).OAuthCallback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_OAuthCallback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).OAuthCallback(ctx, req.(*Auth_OAuthCallbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_LinkProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_LinkProviderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LinkProvider(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LinkProvider_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LinkProvider(ctx, req.(*Auth_LinkProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_UnlinkProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_UnlinkProviderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).UnlinkProvider(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_UnlinkProvider_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).UnlinkProvider(ctx, req.(*Auth_UnlinkProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GetProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Auth_GetProvidersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetProviders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetProviders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetProviders(ctx, req.(*Auth_GetProvidersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -196,6 +448,34 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _AuthService_Login_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _AuthService_RefreshToken_Handler,
+		},
+		{
+			MethodName: "RevokeToken",
+			Handler:    _AuthService_RevokeToken_Handler,
+		},
+		{
+			MethodName: "OAuthLogin",
+			Handler:    _AuthService_OAuthLogin_Handler,
+		},
+		{
+			MethodName: "OAuthCallback",
+			Handler:    _AuthService_OAuthCallback_Handler,
+		},
+		{
+			MethodName: "LinkProvider",
+			Handler:    _AuthService_LinkProvider_Handler,
+		},
+		{
+			MethodName: "UnlinkProvider",
+			Handler:    _AuthService_UnlinkProvider_Handler,
+		},
+		{
+			MethodName: "GetProviders",
+			Handler:    _AuthService_GetProviders_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

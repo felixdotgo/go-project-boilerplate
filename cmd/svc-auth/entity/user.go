@@ -9,12 +9,26 @@ import (
 
 // User entity represents a real user in our application
 type User struct {
-	ID        int            `json:"id" gorm:"primarykey"`
-	Email     string         `json:"email"`
-	Password  string         `json:"password"`
+	// Core identity
+	ID       int            `json:"id" gorm:"primarykey"`
+	Email    string         `json:"email" gorm:"uniqueIndex;not null"`
+	Password *string        `json:"-" gorm:"type:varchar(255)"` // Nullable for OAuth-only users
+
+	// User profile (aggregated from OAuth providers or self-entered)
+	Name          *string `json:"name,omitempty" gorm:"type:varchar(255)"`
+	FirstName     *string `json:"first_name,omitempty" gorm:"type:varchar(100)"`
+	LastName      *string `json:"last_name,omitempty" gorm:"type:varchar(100)"`
+	AvatarURL     *string `json:"avatar_url,omitempty" gorm:"type:text"`
+	EmailVerified bool    `json:"email_verified" gorm:"default:false"`
+	Locale        *string `json:"locale,omitempty" gorm:"type:varchar(10)"`
+
+	// Timestamps
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relationships
+	OAuthProviders []UserOAuthProvider `json:"-" gorm:"foreignKey:UserID"`
 }
 
 // SetPassword convert plaintext password into encrypted password
@@ -26,17 +40,23 @@ func (u *User) SetPassword(password string) error {
 	if err != nil {
 		return err
 	}
-	u.Password = string(bytes)
+	hashedPassword := string(bytes)
+	u.Password = &hashedPassword
 	return nil
 }
 
 // IsValidPassword check given password is correct with what was set in Password field
 func (u *User) IsValidPassword(password string) bool {
-	if u == nil {
+	if u == nil || u.Password == nil {
 		return false
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(*u.Password), []byte(password))
 	return err == nil
+}
+
+// HasPassword checks if user has a password set (for email/password authentication)
+func (u *User) HasPassword() bool {
+	return u != nil && u.Password != nil && *u.Password != ""
 }
 
 // GetID return ID value
@@ -57,10 +77,10 @@ func (u *User) GetEmail() string {
 
 // GetPassword return Password value
 func (u *User) GetPassword() string {
-	if u == nil {
+	if u == nil || u.Password == nil {
 		return ""
 	}
-	return u.Password
+	return *u.Password
 }
 
 // GetCreatedAt return CreatedAt value
