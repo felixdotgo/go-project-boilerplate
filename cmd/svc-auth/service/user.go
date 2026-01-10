@@ -17,6 +17,7 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/oauth"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/repository"
+	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/repository/model"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
@@ -24,6 +25,8 @@ import (
 
 var (
 	ErrUserNotFound                 = errors.New("user not found")
+	ErrUserAlreadyExists		   	= errors.New("user already exists")
+	ErrBadRequest                  	= errors.New("bad request")
 	ErrInvalidRefreshToken          = errors.New("invalid refresh token")
 	ErrProviderAlreadyLinked        = errors.New("provider already linked")
 	ErrCannotUnlinkLastAuth         = errors.New("cannot unlink last authentication method")
@@ -64,21 +67,14 @@ type OAuthUserInfo struct {
 
 // UserServiceInterface is an interface define all methods that will be used to handle user
 type UserServiceInterface interface {
-	// User management
-	Create(ctx context.Context, user *entity.User) error
-	FindByEmail(ctx context.Context, email string) (*entity.User, error)
-	FindByID(ctx context.Context, id int) (*entity.User, error)
-	Save(ctx context.Context, user *entity.User) error
-	VerifyCredentials(ctx context.Context, user *entity.User, email, password string) error
+	Login(ctx context.Context, email, password string) (*TokenPair, error)
+	Register(ctx context.Context, email, password string) error
 
-	// Token management
-	GenerateTokenPair(ctx context.Context, user *entity.User) (*TokenPair, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenPair, error)
 	RevokeToken(ctx context.Context, refreshToken string) error
 
-	// OAuth flow methods
 	GetOAuthAuthorizationURL(provider, state, redirectURI string) (string, error)
-	FindOrCreateOAuthUser(ctx context.Context, provider, code, redirectURI string) (*entity.User, bool, error)
+	OAuthCallback(ctx context.Context, provider, code, redirectURI string) (*TokenPair, bool, error)
 	LinkOAuthProvider(ctx context.Context, userID uint, provider, code, redirectURI string) error
 	UnlinkOAuthProvider(ctx context.Context, userID uint, provider string) error
 	GetUserLinkedProviders(ctx context.Context, userID uint) ([]string, error)
@@ -100,28 +96,37 @@ func NewUserService(cfg *config.Config, userRepo repository.UserRepoInterface) U
 	}
 }
 
-// Create creates a new user
-func (u *UserService) Create(ctx context.Context, user *entity.User) error {
-	return u.r.Save(ctx, user)
-}
-
-// FindByEmail returns a user by given email, return error if any
-func (u *UserService) FindByEmail(ctx context.Context, email string) (*entity.User, error) {
-	req, err := u.r.FindByEmail(ctx, email)
+// Login authenticates user and returns token pair
+func (u *UserService) Login(ctx context.Context, email, password string) (*TokenPair, error) {
+	user, err := u.r.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, u.repoToServiceError(err)
 	}
-	return req, nil
+
+	// Verify password
+	err = u.VerifyCredentials(ctx, user, email, password)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.generateTokenPair(ctx, user)
 }
 
-// FindByID returns a user by given id, return error if any
-func (u *UserService) FindByID(ctx context.Context, id int) (*entity.User, error) {
-	return u.r.FindByID(ctx, id)
-}
+// Register creates a new user with email and password
+func (u *UserService) Register(ctx context.Context, email, password string) error {
+	user, err := u.r.FindByEmail(ctx, email)
+	if err == nil && user != nil {
+		return ErrUserAlreadyExists
+	}
 
-// Save creates or updates a user
-func (u *UserService) Save(ctx context.Context, user *entity.User) error {
-	return u.r.Save(ctx, user)
+	newUser := &entity.User{
+		Email: email,
+	}
+	if err := newUser.SetPassword(password); err != nil {
+		return ErrBadRequest
+	}
+
+	return u.r.Save(ctx, newUser)
 }
 
 // VerifyCredentials verify user credentials
@@ -146,7 +151,7 @@ func (u *UserService) repoToServiceError(err error) error {
 }
 
 // GenerateTokenPair creates both access and refresh tokens
-func (u *UserService) GenerateTokenPair(ctx context.Context, user *entity.User) (*TokenPair, error) {
+func (u *UserService) generateTokenPair(ctx context.Context, user *entity.User) (*TokenPair, error) {
 	// Generate JWT access token (you'll need to implement this based on your JWT setup)
 	accessToken, err := u.generateJWTToken(user)
 	if err != nil {
@@ -161,7 +166,7 @@ func (u *UserService) GenerateTokenPair(ctx context.Context, user *entity.User) 
 
 	// Hash and store refresh token
 	tokenHash := u.hashToken(refreshToken)
-	refreshTokenEntity := &entity.RefreshToken{
+	refreshTokenEntity := &model.RefreshToken{
 		UserID:    user.ID,
 		Token:     tokenHash,
 		ExpiresAt: time.Now().Add(30 * 24 * time.Hour), // 30 days
@@ -195,8 +200,14 @@ func (u *UserService) RefreshAccessToken(ctx context.Context, refreshToken strin
 		return nil, ErrInvalidRefreshToken
 	}
 
+	// Fetch the user
+	user, err := u.r.FindByID(ctx, storedToken.UserID)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+
 	// Generate new token pair
-	return u.GenerateTokenPair(ctx, &storedToken.User)
+	return u.generateTokenPair(ctx, user)
 }
 
 // RevokeToken revokes a refresh token
@@ -226,9 +237,23 @@ func (u *UserService) GetOAuthAuthorizationURL(provider, state, redirectURI stri
 	return oauthProvider.GetAuthURL(state), nil
 }
 
+func (u *UserService) OAuthCallback(ctx context.Context, provider, code, redirectURI string) (*TokenPair, bool, error) {
+	user, isNewUser, err := u.findOrCreateOAuthUser(ctx, provider, code, redirectURI)
+	if err != nil {
+		return nil, false, err
+	}
+
+	tokenPair, err := u.generateTokenPair(ctx, user)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return tokenPair, isNewUser, nil
+}
+
 // FindOrCreateOAuthUser handles OAuth user authentication via code exchange
 // Returns (user, isNewUser, error)
-func (u *UserService) FindOrCreateOAuthUser(ctx context.Context, provider, code, redirectURI string) (*entity.User, bool, error) {
+func (u *UserService) findOrCreateOAuthUser(ctx context.Context, provider, code, redirectURI string) (*entity.User, bool, error) {
 	// Get OAuth config for provider
 	oauthConfig := u.getOAuthConfig(provider)
 	if oauthConfig == nil {
@@ -383,33 +408,18 @@ func (u *UserService) LinkOAuthProvider(ctx context.Context, userID uint, provid
 // linkOAuthProviderInternal is an internal helper to link OAuth provider
 func (u *UserService) linkOAuthProviderInternal(ctx context.Context, userID int, provider string, userInfo *oauth.UserInfo, token *oauth2.Token) error {
 	encryptedAccess := u.encrypt(token.AccessToken)
-	encryptedRefresh := ""
+	var encryptedRefresh *string
 	if token.RefreshToken != "" {
-		encryptedRefresh = u.encrypt(token.RefreshToken)
+		encrypted := u.encrypt(token.RefreshToken)
+		encryptedRefresh = &encrypted
 	}
 
-	oauthProvider := &entity.UserOAuthProvider{
-		UserID:         userID,
-		Provider:       provider,
-		ProviderUserID: userInfo.ProviderUserID,
-		AccessToken:    &encryptedAccess,
-		Email:          &userInfo.Email,
-		Name:           &userInfo.Name,
-		FirstName:      &userInfo.FirstName,
-		LastName:       &userInfo.LastName,
-		AvatarURL:      &userInfo.AvatarURL,
-		EmailVerified:  userInfo.EmailVerified,
-		Locale:         &userInfo.Locale,
-	}
-
-	if encryptedRefresh != "" {
-		oauthProvider.RefreshToken = &encryptedRefresh
-	}
+	var tokenExpiry *time.Time
 	if !token.Expiry.IsZero() {
-		oauthProvider.TokenExpiry = &token.Expiry
+		tokenExpiry = &token.Expiry
 	}
 
-	return u.r.CreateOAuthProvider(ctx, oauthProvider)
+	return u.r.CreateOAuthProvider(ctx, userID, provider, &encryptedAccess, encryptedRefresh, userInfo, tokenExpiry)
 }
 
 // UnlinkOAuthProvider removes an OAuth provider from a user account
@@ -549,46 +559,6 @@ func (u *UserService) encrypt(plaintext string) string {
 
 	ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
 	return base64.StdEncoding.EncodeToString(ciphertext)
-}
-
-func (u *UserService) decrypt(ciphertext string) string {
-	if ciphertext == "" {
-		return ""
-	}
-
-	key := []byte(u.cfg.JWT.EncryptionKey)
-	if len(key) != 32 {
-		return ciphertext
-	}
-
-	data, err := base64.StdEncoding.DecodeString(ciphertext)
-	if err != nil {
-		return ciphertext
-	}
-
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return ciphertext
-	}
-
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return ciphertext
-	}
-
-	if len(data) < gcm.NonceSize() {
-		return ciphertext
-	}
-
-	nonce := data[:gcm.NonceSize()]
-	cipherData := data[gcm.NonceSize():]
-
-	plaintext, err := gcm.Open(nil, nonce, cipherData, nil)
-	if err != nil {
-		return ciphertext
-	}
-
-	return string(plaintext)
 }
 
 // generateJWTToken generates a JWT access token for the user

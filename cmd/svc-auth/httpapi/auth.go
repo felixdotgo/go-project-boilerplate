@@ -4,14 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/config"
-	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/service"
-	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	v1 "github.com/0x46656C6978/go-project-boilerplate/pkg/rpc/api/auth/v1"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -44,21 +40,11 @@ func (u *AuthHttpApi) Ping(ctx context.Context, req *v1.Auth_PingRequest) (*v1.A
 // Login is a method that handles the login request
 // Returns OAuth2-compliant TokenResponse with access_token and refresh_token
 func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1.Auth_LoginResponse, error) {
-	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
+	tokenPair, err := u.s.Login(ctx, req.GetData().GetEmail(), req.GetData().GetPassword())
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			return nil, NewError(http.StatusNotFound, "user not found")
+			return nil, NewError(http.StatusUnauthorized, "invalid email or password")
 		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
-	}
-	err = u.s.VerifyCredentials(ctx, user, req.GetData().GetEmail(), req.GetData().GetPassword())
-	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "invalid credentials")
-	}
-
-	// Generate OAuth2 token pair
-	tokenPair, err := u.s.GenerateTokenPair(ctx, user)
-	if err != nil {
 		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
 
@@ -75,23 +61,14 @@ func (u *AuthHttpApi) Login(ctx context.Context, req *v1.Auth_LoginRequest) (*v1
 
 // Regiter is a method that handles the register request
 func (u *AuthHttpApi) Regiter(ctx context.Context, req *v1.Auth_RegisterRequest) (*v1.Auth_RegisterResponse, error) {
-	user, err := u.s.FindByEmail(ctx, req.GetData().GetEmail())
+	err := u.s.Register(ctx, req.GetData().GetEmail(), req.GetData().GetPassword())
 	if err != nil {
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
-	}
-	if user != nil {
-		return nil, NewError(http.StatusConflict, "user already exists")
-	}
-
-	user = &entity.User{}
-	user.Email = req.GetData().GetEmail()
-	err = user.SetPassword(req.GetData().GetPassword())
-	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "unable to set password")
-	}
-
-	err = u.s.Create(ctx, user)
-	if err != nil {
+		if errors.Is(err, service.ErrUserAlreadyExists) {
+			return nil, NewError(http.StatusConflict, "user with this email already exists")
+		}
+		if errors.Is(err, service.ErrBadRequest) {
+			return nil, NewError(http.StatusBadRequest, "invalid request data")
+		}
 		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
 
@@ -175,7 +152,7 @@ func (u *AuthHttpApi) OAuthCallback(ctx context.Context, req *v1.Auth_OAuthCallb
 	}
 
 	// Find or create user from OAuth provider
-	user, isNewUser, err := u.s.FindOrCreateOAuthUser(ctx, provider, code, redirectUri)
+	tokenPair, isNewUser, err := u.s.OAuthCallback(ctx, provider, code, redirectUri)
 	if err != nil {
 		if errors.Is(err, service.ErrOAuthProviderNotConfigured) {
 			return nil, NewError(http.StatusBadRequest, "provider not configured")
@@ -186,12 +163,6 @@ func (u *AuthHttpApi) OAuthCallback(ctx context.Context, req *v1.Auth_OAuthCallb
 		if errors.Is(err, service.ErrOAuthUserInfoFailed) {
 			return nil, NewError(http.StatusBadRequest, "failed to get user info from provider")
 		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
-	}
-
-	// Generate token pair for the authenticated user
-	tokenPair, err := u.s.GenerateTokenPair(ctx, user)
-	if err != nil {
 		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
 
@@ -311,22 +282,4 @@ func (u *AuthHttpApi) getUserIDFromContext(ctx context.Context) (uint, error) {
 		return 0, errors.New("user_id not found in context")
 	}
 	return userID, nil
-}
-
-func (u *AuthHttpApi) generateJWTToken(user *entity.User) (string, error) {
-	now := time.Now()
-	exp := time.Duration(conv.ToInt64(u.cfg.JWT.Expire))
-	claims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(now.Add(exp)),
-		IssuedAt:  jwt.NewNumericDate(now),
-		Issuer:    u.cfg.JWT.Issuer,
-		Subject:   user.Email,
-	}
-
-	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedStr, err := tok.SignedString([]byte(u.cfg.JWT.Secret))
-	if err != nil {
-		return "", err
-	}
-	return signedStr, nil
 }
