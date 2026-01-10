@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/0x46656C6978/go-project-boilerplate/rpc
+      value: github.com/0x46656C6978/go-project-boilerplate/pkg/rpc
 plugins:
   # - remote: buf.build/connectrpc/go
   #   out: rpc
@@ -11,17 +11,17 @@ plugins:
   - remote: buf.build/community/google-gnostic-openapi:v0.7.0
     out: api/openapi
   - local: protoc-gen-go
-    out: rpc
+    out: pkg/rpc
     opt:
       - paths=source_relative
   - local: protoc-gen-go-grpc
-    out: rpc
+    out: pkg/rpc
     opt:
       - paths=source_relative
   - local: protoc-gen-grpc-gateway
-    out: rpc
+    out: pkg/rpc
     opt:
       - paths=source_relative
       - generate_unbound_methods=true
 inputs:
-  - directory: proto
+  - directory: api/proto

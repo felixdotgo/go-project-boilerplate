@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package models;
 
-option go_package = "github.com/0x46656C6978/go-project-boilerplate/rpc";
+option go_package = "github.com/0x46656C6978/go-project-boilerplate/pkg/rpc";
 
 import "google/protobuf/timestamp.proto";
 

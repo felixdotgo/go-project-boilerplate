@@ -10,7 +10,7 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/entity"
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/service"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
-	v1 "github.com/0x46656C6978/go-project-boilerplate/rpc/api/auth/v1"
+	v1 "github.com/0x46656C6978/go-project-boilerplate/pkg/rpc/api/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -95,8 +95,7 @@ func (u *AuthHttpApi) Regiter(ctx context.Context, req *v1.Auth_RegisterRequest)
 		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
 	}
 
-    return &v1.Auth_RegisterResponse{
-	}, nil
+	return &v1.Auth_RegisterResponse{}, nil
 }
 
 // RefreshToken is a method that handles the refresh token request
