@@ -13,8 +13,8 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.19.0
-	golang.org/x/crypto v0.33.0
-	golang.org/x/net v0.35.0
+	golang.org/x/crypto v0.36.0
+	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.34.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
@@ -52,7 +52,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
