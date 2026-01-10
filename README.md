@@ -1,28 +1,25 @@
 # Golang project boilerplate
-This repo's name explain itself. Still have a lot of things todo
+Starter template for Go monorepos/moduliths and microservices: Buf-managed protobufs and generated gRPC code, example services, a SolidJS auth frontend, and a local dev stack (Docker, Traefik, CoreDNS, mkcert).
 
 ## Project Structure
 
 ```
 .
 ├── api/                # API specifications
-│   └── openapi/        # OpenAPI/Swagger definitions
+│   ├── openapi/        # OpenAPI/Swagger definitions
+│   └── proto/          # Protocol Buffer definitions
 ├── cmd/                # Application entry points
 │   ├── foo/            # Example service
 │   └── svc-auth/       # Authentication service
-├── frontend/           # Frontend applications
-│   └── auth/           # Authentication frontend (React/TypeScript)
+├── website/            # Frontend applications
+│   └── auth/           # Authentication frontend (SolidStart/TypeScript)
 ├── pkg/                # Shared Go packages
 │   ├── conv/           # Conversion utilities
 │   ├── core/           # Core abstractions (server, repository, service base)
 │   ├── log/            # Logging utilities
 │   ├── migrator/       # Database migration tools
+│   ├── rpc/            # Generated gRPC code (auto-generated from proto/)
 │   └── tools/          # Build tools and dependencies
-├── proto/              # Protocol Buffer definitions
-│   ├── api/            # API service definitions
-│   ├── common/         # Shared proto definitions
-│   └── models/         # Data model definitions
-├── rpc/                # Generated gRPC code (auto-generated from proto/)
 ├── scripts/            # Build and setup scripts
 ├── devenv/             # Development environment configuration
 └── init/               # Initialization files
@@ -32,9 +29,9 @@ This repo's name explain itself. Still have a lot of things todo
 
 - **`cmd/`**: Contains the main applications. Each subdirectory represents a separate microservice
 - **`pkg/`**: Reusable Go packages shared across services
-- **`proto/`**: Protocol Buffer definitions for gRPC services
-- **`rpc/`**: Auto-generated Go code from protobuf definitions
-- **`frontend/`**: Web frontend applications (React/TypeScript with Tailwind CSS)
+- **`api/proto/`**: Protocol Buffer definitions for gRPC services
+- **`pkg/rpc/`**: Auto-generated Go code from protobuf definitions
+- **`website/`**: Web frontend applications (SolidStart/TypeScript)
 - **`api/`**: API documentation and specifications
 
 # Getting started
@@ -56,11 +53,11 @@ make docker.up
 ```
 
 ## Generate protobuf
-You can define your protobuf inside `proto` directory and then run the following command to generate output
+You can define your protobuf inside `api/proto` directory and then run the following command to generate output
 ```bash
 make generate-proto
 ```
-All protobuf generated will be under `rpc` directory. To see how to implement API from generated code after run the command above, please refer to [Buf quick start](https://buf.build/docs/cli/quickstart/).
+All protobuf generated will be under `pkg/rpc` directory. To see how to implement API from generated code after run the command above, please refer to [Buf quick start](https://buf.build/docs/cli/quickstart/).
 
 ## DNS setup
 We use CoreDNS as a local DNS resolver
@@ -93,4 +90,3 @@ Shutdown and restart WSL2
 In Docker Desktop, go to `Settings > Resources > WSL Integration`, then disable and re-enable integration for your WSL2 distro.
 
 Uncomment the `insecure: true` line in `devenv/traefik/traefik.yml` to enable insecure access to the Traefik dashboard.
-
