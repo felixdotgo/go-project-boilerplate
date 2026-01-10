@@ -11,7 +11,7 @@ import (
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/conv"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/core"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/log"
-	authv1 "github.com/0x46656C6978/go-project-boilerplate/rpc/api/auth/v1"
+	authv1 "github.com/0x46656C6978/go-project-boilerplate/pkg/rpc/api/auth/v1"
 	"gorm.io/driver/postgres"
 	gormlogger "gorm.io/gorm/logger"
 
