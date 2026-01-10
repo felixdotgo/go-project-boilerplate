@@ -34,3 +34,8 @@ __debug_bin*
 
 # Local data for Docker
 .docker/
+
+# environment variables file
+.env
+.env.*
+!.env.example
