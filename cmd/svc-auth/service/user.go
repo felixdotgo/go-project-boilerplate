@@ -23,24 +23,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var (
-	ErrUserNotFound                 = errors.New("user not found")
-	ErrUserAlreadyExists		   	= errors.New("user already exists")
-	ErrBadRequest                  	= errors.New("bad request")
-	ErrInvalidRefreshToken          = errors.New("invalid refresh token")
-	ErrProviderAlreadyLinked        = errors.New("provider already linked")
-	ErrCannotUnlinkLastAuth         = errors.New("cannot unlink last authentication method")
-	ErrRefreshTokenNotFound         = errors.New("refresh token not found")
-	ErrRefreshTokenExpired          = errors.New("refresh token expired")
-	ErrRefreshTokenRevoked          = errors.New("refresh token revoked")
-	ErrOAuthProviderNotConfigured   = errors.New("oauth provider not configured")
-	ErrOAuthExchangeFailed          = errors.New("oauth exchange failed")
-	ErrOAuthUserInfoFailed          = errors.New("oauth user info failed")
-	ErrOAuthProviderAlreadyLinked   = errors.New("oauth provider already linked")
-	ErrOAuthProviderNotLinked       = errors.New("oauth provider not linked")
-	ErrCannotUnlinkLastAuthMethod   = errors.New("cannot unlink last authentication method")
-)
-
 // TokenPair represents access and refresh tokens
 type TokenPair struct {
 	AccessToken  string
@@ -192,12 +174,12 @@ func (u *UserService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	// Retrieve token from database
 	storedToken, err := u.r.FindRefreshTokenByToken(ctx, tokenHash)
 	if err != nil {
-		return nil, ErrInvalidRefreshToken
+		return nil, ErrRefreshTokenInvalid
 	}
 
 	// Validate token
 	if !storedToken.IsValid() {
-		return nil, ErrInvalidRefreshToken
+		return nil, ErrRefreshTokenInvalid
 	}
 
 	// Fetch the user
@@ -216,7 +198,7 @@ func (u *UserService) RevokeToken(ctx context.Context, refreshToken string) erro
 
 	storedToken, err := u.r.FindRefreshTokenByToken(ctx, tokenHash)
 	if err != nil {
-		return ErrInvalidRefreshToken
+		return ErrRefreshTokenInvalid
 	}
 
 	return u.r.RevokeRefreshToken(ctx, storedToken.ID)
@@ -224,6 +206,13 @@ func (u *UserService) RevokeToken(ctx context.Context, refreshToken string) erro
 
 // GetOAuthAuthorizationURL generates the OAuth authorization URL
 func (u *UserService) GetOAuthAuthorizationURL(provider, state, redirectURI string) (string, error) {
+	if provider == "" {
+		return "", ErrOAuthProviderEmpty
+	}
+	if state == "" {
+		return "", ErrOAuthStateEmpty
+	}
+
 	oauthConfig := u.getOAuthConfig(provider)
 	if oauthConfig == nil {
 		return "", ErrOAuthProviderNotConfigured
@@ -238,6 +227,13 @@ func (u *UserService) GetOAuthAuthorizationURL(provider, state, redirectURI stri
 }
 
 func (u *UserService) OAuthCallback(ctx context.Context, provider, code, redirectURI string) (*TokenPair, bool, error) {
+	if provider == "" {
+		return nil, false, ErrOAuthProviderEmpty
+	}
+	if code == "" {
+		return nil, false, ErrOAuthCodeEmpty
+	}
+
 	user, isNewUser, err := u.findOrCreateOAuthUser(ctx, provider, code, redirectURI)
 	if err != nil {
 		return nil, false, err
@@ -366,6 +362,13 @@ func (u *UserService) findOrCreateOAuthUser(ctx context.Context, provider, code,
 
 // LinkOAuthProvider links a new OAuth provider to an existing user via code exchange
 func (u *UserService) LinkOAuthProvider(ctx context.Context, userID uint, provider, code, redirectURI string) error {
+	if provider == "" {
+		return ErrOAuthProviderEmpty
+	}
+	if code == "" {
+		return ErrOAuthCodeEmpty
+	}
+
 	// Get OAuth config for provider
 	oauthConfig := u.getOAuthConfig(provider)
 	if oauthConfig == nil {
@@ -424,6 +427,10 @@ func (u *UserService) linkOAuthProviderInternal(ctx context.Context, userID int,
 
 // UnlinkOAuthProvider removes an OAuth provider from a user account
 func (u *UserService) UnlinkOAuthProvider(ctx context.Context, userID uint, provider string) error {
+	if provider == "" {
+		return ErrOAuthProviderEmpty
+	}
+
 	// Get user to check authentication methods
 	user, err := u.r.FindByID(ctx, int(userID))
 	if err != nil {

@@ -111,25 +111,15 @@ func (u *AuthHttpApi) RevokeToken(ctx context.Context, req *v1.Auth_RevokeTokenR
 }
 
 // OAuthLogin is a method that handles the OAuth login request
-// Returns the authorization URL that the client should redirect to
+// returns the authorization URL that the client should redirect to
 func (u *AuthHttpApi) OAuthLogin(ctx context.Context, req *v1.Auth_OAuthLoginRequest) (*v1.Auth_OAuthLoginResponse, error) {
 	provider := req.GetProvider()
 	state := req.GetState()
 	redirectUri := req.GetRedirectUri()
 
-	if provider == "" {
-		return nil, NewError(http.StatusBadRequest, "provider is required")
-	}
-	if state == "" {
-		return nil, NewError(http.StatusBadRequest, "state is required")
-	}
-
 	authURL, err := u.s.GetOAuthAuthorizationURL(provider, state, redirectUri)
 	if err != nil {
-		if errors.Is(err, service.ErrOAuthProviderNotConfigured) {
-			return nil, NewError(http.StatusBadRequest, "provider not configured")
-		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
+		return nil, FromUserToHTTPError(err)
 	}
 
 	return &v1.Auth_OAuthLoginResponse{
@@ -138,32 +128,16 @@ func (u *AuthHttpApi) OAuthLogin(ctx context.Context, req *v1.Auth_OAuthLoginReq
 }
 
 // OAuthCallback is a method that handles the OAuth callback request
-// Exchanges the authorization code for tokens and creates/authenticates the user
+// exchanges the authorization code for tokens and creates/authenticates the user
 func (u *AuthHttpApi) OAuthCallback(ctx context.Context, req *v1.Auth_OAuthCallbackRequest) (*v1.Auth_OAuthCallbackResponse, error) {
 	provider := req.GetProvider()
 	code := req.GetCode()
 	redirectUri := req.GetRedirectUri()
 
-	if provider == "" {
-		return nil, NewError(http.StatusBadRequest, "provider is required")
-	}
-	if code == "" {
-		return nil, NewError(http.StatusBadRequest, "code is required")
-	}
-
 	// Find or create user from OAuth provider
 	tokenPair, isNewUser, err := u.s.OAuthCallback(ctx, provider, code, redirectUri)
 	if err != nil {
-		if errors.Is(err, service.ErrOAuthProviderNotConfigured) {
-			return nil, NewError(http.StatusBadRequest, "provider not configured")
-		}
-		if errors.Is(err, service.ErrOAuthExchangeFailed) {
-			return nil, NewError(http.StatusBadRequest, "failed to exchange authorization code")
-		}
-		if errors.Is(err, service.ErrOAuthUserInfoFailed) {
-			return nil, NewError(http.StatusBadRequest, "failed to get user info from provider")
-		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
+		return nil, FromUserToHTTPError(err)
 	}
 
 	return &v1.Auth_OAuthCallbackResponse{
@@ -190,31 +164,9 @@ func (u *AuthHttpApi) LinkProvider(ctx context.Context, req *v1.Auth_LinkProvide
 	code := req.GetCode()
 	redirectUri := req.GetRedirectUri()
 
-	if provider == "" {
-		return nil, NewError(http.StatusBadRequest, "provider is required")
-	}
-	if code == "" {
-		return nil, NewError(http.StatusBadRequest, "code is required")
-	}
-
 	err = u.s.LinkOAuthProvider(ctx, userID, provider, code, redirectUri)
 	if err != nil {
-		if errors.Is(err, service.ErrUserNotFound) {
-			return nil, NewError(http.StatusNotFound, "user not found")
-		}
-		if errors.Is(err, service.ErrOAuthProviderNotConfigured) {
-			return nil, NewError(http.StatusBadRequest, "provider not configured")
-		}
-		if errors.Is(err, service.ErrOAuthProviderAlreadyLinked) {
-			return nil, NewError(http.StatusConflict, "provider already linked to another account")
-		}
-		if errors.Is(err, service.ErrOAuthExchangeFailed) {
-			return nil, NewError(http.StatusBadRequest, "failed to exchange authorization code")
-		}
-		if errors.Is(err, service.ErrOAuthUserInfoFailed) {
-			return nil, NewError(http.StatusBadRequest, "failed to get user info from provider")
-		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
+		return nil, FromUserToHTTPError(err)
 	}
 
 	return &v1.Auth_LinkProviderResponse{}, nil
@@ -229,22 +181,10 @@ func (u *AuthHttpApi) UnlinkProvider(ctx context.Context, req *v1.Auth_UnlinkPro
 	}
 
 	provider := req.GetProvider()
-	if provider == "" {
-		return nil, NewError(http.StatusBadRequest, "provider is required")
-	}
 
 	err = u.s.UnlinkOAuthProvider(ctx, userID, provider)
 	if err != nil {
-		if errors.Is(err, service.ErrUserNotFound) {
-			return nil, NewError(http.StatusNotFound, "user not found")
-		}
-		if errors.Is(err, service.ErrOAuthProviderNotLinked) {
-			return nil, NewError(http.StatusNotFound, "provider not linked")
-		}
-		if errors.Is(err, service.ErrCannotUnlinkLastAuthMethod) {
-			return nil, NewError(http.StatusBadRequest, "cannot unlink last authentication method")
-		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
+		return nil, FromUserToHTTPError(err)
 	}
 
 	return &v1.Auth_UnlinkProviderResponse{}, nil
@@ -260,10 +200,7 @@ func (u *AuthHttpApi) GetProviders(ctx context.Context, req *v1.Auth_GetProvider
 
 	providers, err := u.s.GetUserLinkedProviders(ctx, userID)
 	if err != nil {
-		if errors.Is(err, service.ErrUserNotFound) {
-			return nil, NewError(http.StatusNotFound, "user not found")
-		}
-		return nil, NewError(http.StatusInternalServerError, ErrInternalServerError)
+		return nil, FromUserToHTTPError(err)
 	}
 
 	return &v1.Auth_GetProvidersResponse{
