@@ -82,12 +82,14 @@ func NewUserService(cfg *config.Config, userRepo repository.UserRepoInterface) U
 func (u *UserService) Login(ctx context.Context, email, password string) (*TokenPair, error) {
 	user, err := u.r.FindByEmail(ctx, email)
 	if err != nil {
+		u.Logger.With("error_message", err.Error(), "email", email).Error("failed to find user by email")
 		return nil, u.repoToServiceError(err)
 	}
 
 	// Verify password
 	err = u.VerifyCredentials(ctx, user, email, password)
 	if err != nil {
+		u.Logger.With("error_message", err.Error(), "email", email).Error("invalid credentials")
 		return nil, err
 	}
 
@@ -105,6 +107,7 @@ func (u *UserService) Register(ctx context.Context, email, password string) erro
 		Email: email,
 	}
 	if err := newUser.SetPassword(password); err != nil {
+		u.Logger.With("error_message", err.Error(), "email", email).Error("failed to set user password")
 		return ErrBadRequest
 	}
 
@@ -174,6 +177,7 @@ func (u *UserService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	// Retrieve token from database
 	storedToken, err := u.r.FindRefreshTokenByToken(ctx, tokenHash)
 	if err != nil {
+		u.Logger.With("error_message", err.Error()).Error("failed to find refresh token")
 		return nil, ErrRefreshTokenInvalid
 	}
 
@@ -185,6 +189,7 @@ func (u *UserService) RefreshAccessToken(ctx context.Context, refreshToken strin
 	// Fetch the user
 	user, err := u.r.FindByID(ctx, storedToken.UserID)
 	if err != nil {
+		u.Logger.With("error_message", err.Error(), "user_id", storedToken.UserID).Error("failed to find user by ID")
 		return nil, ErrUserNotFound
 	}
 
@@ -198,6 +203,7 @@ func (u *UserService) RevokeToken(ctx context.Context, refreshToken string) erro
 
 	storedToken, err := u.r.FindRefreshTokenByToken(ctx, tokenHash)
 	if err != nil {
+		u.Logger.With("error_message", err.Error()).Error("failed to find refresh token")
 		return ErrRefreshTokenInvalid
 	}
 
@@ -226,6 +232,7 @@ func (u *UserService) GetOAuthAuthorizationURL(provider, state, redirectURI stri
 	return oauthProvider.GetAuthURL(state), nil
 }
 
+// OAuthCallback handles OAuth callback and returns token pair
 func (u *UserService) OAuthCallback(ctx context.Context, provider, code, redirectURI string) (*TokenPair, bool, error) {
 	if provider == "" {
 		return nil, false, ErrOAuthProviderEmpty
