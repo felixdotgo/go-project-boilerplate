@@ -6,11 +6,13 @@ make run CMD=svc-auth
 ```
 
 ## Migration commands
-Create migration in `migrations/sql` directory
+From the repo root:
 ```
-go run cmd/migrator/migrator.go create -n my_file_name
+go run ./cmd/svc-auth/cmd/migrator create -n my_file_name
 ```
-Execute all migrations
+
+From `cmd/svc-auth/`:
 ```
-go run cmd/migrator/migrator.go up
+go run ./cmd/migrator/migrator.go create -n my_file_name
+go run ./cmd/migrator/migrator.go up
 ```

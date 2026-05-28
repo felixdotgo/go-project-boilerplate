@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/0x46656C6978/go-project-boilerplate/cmd/svc-auth/config"
 	"github.com/0x46656C6978/go-project-boilerplate/pkg/migrator"
@@ -35,7 +37,12 @@ func main() {
 		panic(err)
 	}
 
-	m, err := migrator.New(db)
+	repoRoot, err := findRepoRoot()
+	if err != nil {
+		panic(err)
+	}
+
+	m, err := migrator.New(db, filepath.Join(repoRoot, "cmd", "svc-auth", "migrations", "sql"))
 	if err != nil {
 		panic(err)
 	}
@@ -47,6 +54,24 @@ func main() {
 	err = cmd.Execute()
 	if err != nil {
 		return
+	}
+}
+
+func findRepoRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("could not locate repo root from working directory")
+		}
+		dir = parent
 	}
 }
 

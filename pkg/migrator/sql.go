@@ -16,14 +16,18 @@ import (
 // Migrator is a wrapper around golang-migrate
 // contains all methods that will be used to handle database migrations
 type Migrator struct {
-	m *migrate.Migrate
+	m   *migrate.Migrate
+	dir string
 }
 
-const MIGRATION_DIR = "file://migrations/sql"
-
 // New creates a new migrator
-func New(db *gorm.DB) (MigratorInterface, error) {
+func New(db *gorm.DB, migrationDir string) (MigratorInterface, error) {
 	conn, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	absDir, err := filepath.Abs(migrationDir)
 	if err != nil {
 		return nil, err
 	}
@@ -33,13 +37,15 @@ func New(db *gorm.DB) (MigratorInterface, error) {
 		return nil, err
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(MIGRATION_DIR, "postgres", driver)
+	migrationURL := "file://" + filepath.ToSlash(absDir)
+	m, err := migrate.NewWithDatabaseInstance(migrationURL, "postgres", driver)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Migrator{
-		m: m,
+		m:   m,
+		dir: absDir,
 	}, nil
 }
 
@@ -55,11 +61,9 @@ func (m *Migrator) Down() error {
 
 // Create creates a new migration file
 func (m *Migrator) Create(name, ext string) error {
-	dir := strings.Replace(MIGRATION_DIR, "file://", "./", -1)
-	dir = filepath.Clean(dir)
 	ext = "." + strings.TrimPrefix(ext, ".")
 	version := fmt.Sprintf("%d", time.Now().UnixMilli())
-	versionGlob := filepath.Join(dir, version+"_*"+ext)
+	versionGlob := filepath.Join(m.dir, version+"_*"+ext)
 	matches, err := filepath.Glob(versionGlob)
 	if err != nil {
 		return err
@@ -69,15 +73,19 @@ func (m *Migrator) Create(name, ext string) error {
 		return fmt.Errorf("duplicate migration version: %s", version)
 	}
 
-	if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(m.dir, os.ModePerm); err != nil {
 		return err
 	}
 
 	for _, direction := range []string{"up", "down"} {
 		basename := fmt.Sprintf("%s_%s.%s%s", version, name, direction, ext)
-		filename := filepath.Join(dir, basename)
+		filename := filepath.Join(m.dir, basename)
 
-		if _, err = os.Create(filename); err != nil {
+		file, err := os.Create(filename)
+		if err != nil {
+			return err
+		}
+		if err := file.Close(); err != nil {
 			return err
 		}
 	}
