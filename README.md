@@ -59,6 +59,19 @@ make generate-proto
 ```
 All protobuf generated will be under `pkg/rpc` directory. To see how to implement API from generated code after run the command above, please refer to [Buf quick start](https://buf.build/docs/cli/quickstart/).
 
+## Rename module path for forks
+Forks can rewrite the template module path to match their repository.
+
+```bash
+# infer module path from git origin
+make rename-module
+
+# or provide it explicitly
+make rename-module MODULE=github.com/your-org/your-repo
+```
+
+This maintenance utility lives under `scripts/`, not `cmd/`. It updates the Go module path, Go imports, protobuf `go_package` values, Buf config, and repository docs that still reference the previous module path.
+
 ## DNS setup
 We use CoreDNS as a local DNS resolver
 

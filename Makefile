@@ -105,6 +105,13 @@ generate-proto: ## Generate protobuf code
 	@echo "🎉 $(GREEN)Protobuf code generated successfully$(RESET)"
 
 
+.PHONY: rename-module
+rename-module: ## Rename boilerplate module path [MODULE=github.com/owner/repo]
+	@echo "✨ $(BLUE)Renaming module path...$(RESET)"
+	@go run ./scripts/rename_module.go $(if $(MODULE),--module $(MODULE),)
+	@echo "🎉 $(GREEN)Module rename completed$(RESET)"
+
+
 .PHONY: build
 build: check_cmd_var check_docker_file ## Build specific dir inside `cmd` with `make build CMD=<your dir> [PLATFORM=linux/amd64] [BUILD_ARGS="KEY1=value1,KEY2=value2"]`
 	@echo "✨ $(BLUE)Building $(CMD) Docker image...$(RESET)"
@@ -134,4 +141,3 @@ install: ## Install dependencies
 	@echo "✨ $(BLUE)Installing dependencies...$(RESET)"
 	@./scripts/setup_environment.sh
 	@echo "🎉 $(GREEN)Dependencies installed successfully$(RESET)"
-
