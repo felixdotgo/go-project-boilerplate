@@ -98,15 +98,15 @@ run: check_cmd_var ## Run specific dir inside `cmd` with `make run CMD=<your dir
 	@go run "cmd/$(CMD)/main.go"
 
 
-.PHONY: generate-proto
-generate-proto: ## Generate protobuf code
+.PHONY: proto.generate
+proto.generate: ## Generate protobuf code
 	@echo "✨ $(BLUE)Generating protobuf code...$(RESET)"
 	@buf generate --include-imports
 	@echo "🎉 $(GREEN)Protobuf code generated successfully$(RESET)"
 
 
-.PHONY: rename-module
-rename-module: ## Rename boilerplate module path [MODULE=github.com/owner/repo]
+.PHONY: module.rename
+module.rename: ## Rename boilerplate module path [MODULE=github.com/owner/repo]
 	@echo "✨ $(BLUE)Renaming module path...$(RESET)"
 	@go run ./scripts/rename_module.go $(if $(MODULE),--module $(MODULE),)
 	@echo "🎉 $(GREEN)Module rename completed$(RESET)"
@@ -124,16 +124,36 @@ build: check_cmd_var check_docker_file ## Build specific dir inside `cmd` with `
 	@echo "🎉 $(GREEN)Successfully built $(CMD) image$(RESET)"
 
 
-.PHONY: up
-up: build ## up: Build and start the service
+.PHONY: service.up
+service.up: build ## Build and start the service
 	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
 	@cd cmd/$(CMD)/ && docker compose up
 
 
-.PHONY: upd
-upd: build ## up: Build and start the service (detached mode)
+.PHONY: service.up.detached
+service.up.detached: build ## Build and start the service in detached mode
 	@echo "🚀 $(BLUE)Starting $(CMD) service...$(RESET)"
 	@cd cmd/$(CMD)/ && docker compose up -d
+
+
+.PHONY: generate-proto
+generate-proto:
+	@$(MAKE) proto.generate
+
+
+.PHONY: rename-module
+rename-module:
+	@$(MAKE) module.rename MODULE="$(MODULE)"
+
+
+.PHONY: up
+up:
+	@$(MAKE) service.up CMD="$(CMD)" PLATFORM="$(PLATFORM)" BUILD_ARGS="$(BUILD_ARGS)"
+
+
+.PHONY: upd
+upd:
+	@$(MAKE) service.up.detached CMD="$(CMD)" PLATFORM="$(PLATFORM)" BUILD_ARGS="$(BUILD_ARGS)"
 
 
 .PHONY: install

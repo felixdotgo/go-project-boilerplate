@@ -55,7 +55,7 @@ make docker.up
 ## Generate protobuf
 You can define your protobuf inside `api/proto` directory and then run the following command to generate output
 ```bash
-make generate-proto
+make proto.generate
 ```
 All protobuf generated will be under `pkg/rpc` directory. To see how to implement API from generated code after run the command above, please refer to [Buf quick start](https://buf.build/docs/cli/quickstart/).
 
@@ -64,10 +64,10 @@ Forks can rewrite the template module path to match their repository.
 
 ```bash
 # infer module path from git origin
-make rename-module
+make module.rename
 
 # or provide it explicitly
-make rename-module MODULE=github.com/your-org/your-repo
+make module.rename MODULE=github.com/your-org/your-repo
 ```
 
 This maintenance utility lives under `scripts/`, not `cmd/`. It updates the Go module path, Go imports, protobuf `go_package` values, Buf config, and repository docs that still reference the previous module path.

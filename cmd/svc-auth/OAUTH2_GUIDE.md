@@ -19,7 +19,7 @@ This service now supports OAuth2 authentication with multiple providers (Google,
 Run the migration to create required tables:
 ```bash
 cd cmd/svc-auth
-make migrate-up
+make migrate.up
 ```
 
 This creates:
